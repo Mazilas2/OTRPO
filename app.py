@@ -11,6 +11,8 @@ def get_data(url):
 
 @app.route("/")
 def main():
-    url = 'https://pokeapi.co/api/v2/pokemon?limit=1500&offset=0'
+    url_count = 'https://pokeapi.co/api/v2/pokemon'
+    count = get_data(url_count)["count"]
+    url = f'https://pokeapi.co/api/v2/pokemon?limit={count}&offset=0'
     data = get_data(url)["results"]
     return render_template("index.html", data=data)
