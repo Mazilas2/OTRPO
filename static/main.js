@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#searchButton').onclick = () => {
         filter_table();
     };
+    document.querySelector('#search').addEventListener('keyup', (e) => {
+        if (e.keyCode === 13) {
+            filter_table();
+        }
+    });
 });
 
 function filter_table() {
