@@ -1,17 +1,27 @@
 <head>
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</head>
 <body>
     <div class="App">
         <header class="App-header">
-            <img src="{{ url_for('static', filename='Octocat.png') }}" class="App-logo" alt="logo" />
-            <p>
-                GitHub Codespaces <span class="heart">♥️</span> Flask
-            </p>
-            <p class="small">
-                Edit <code>templates/index.html</code> and refresh to see your changes!
-            </p>
+            <div class="SearchBar">
+                <input type="text" placeholder="Search.." id="search">
+                <button type="submit" id="searchButton">Поиск</button>
+            </div>
+            <table id="tableBody">
+                <tr>
+                    <th>Name</th>
+                    <th>URL</th>
+                </tr>
+                {% for item in data %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.url }}</td>
+                </tr>
+                {% endfor %}
+            </table>
         </header>
     </div>
 </body>

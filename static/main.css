@@ -7,18 +7,8 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-        monospace;
-}
-
 .App {
     text-align: center;
-}
-
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
 }
 
 .App-header {
@@ -28,18 +18,22 @@ code {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: calc(10px + 2vmin);
+    font-size: 14px;
     color: white;
 }
 
-.App-link {
-    color: #61dafb;
+table {
+    color: white;
 }
 
-.heart {
-    color: #ff0000;
+.SearchBar>* {
+    color: black;
+    height: 30px;
 }
 
-.small {
-    font-size: 0.75rem;
+.SearchBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
