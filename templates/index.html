@@ -1,6 +1,7 @@
 <head>
-    <title>{{ title }}</title>
+    <title>Pokemons</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='card.css') }}">
     <script src="{{ url_for('static', filename='main.js') }}"></script>
 </head>
 
@@ -20,12 +21,11 @@
             {% for item in data %}
             <tr>
                 <td>{{ loop.index }}</td>
-                <td>{{ item.name }}</td>
+                <td><a href="{{ url_for('pokemon', name=item.name) }}">{{ item.name }}</a></td>
                 <td>{{ item.url }}</td>
+                <td><span class="arrow arrow-bottom"></span></td>
             </tr>
             {% endfor %}
         </table>
     </div>
 </body>
-
-</html>

@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // filter table depending on search input
     document.querySelector('#search').addEventListener('keyup', filter_table);
 });
 
@@ -18,4 +17,8 @@ function filter_table() {
             }
         }
     }
+}
+
+function expand_element() {
+    // https://codepen.io/AlbertFeynman/pen/YJGjmz
 }

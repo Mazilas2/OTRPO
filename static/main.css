@@ -24,13 +24,29 @@ header {
     top: 0;
     background-color: #282c34;
     height: 100%;
-    width: 100%;
+    width: 95vw;
 }
 
 table {
     color: white;
     margin: 0;
+    padding: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 70vw;
 }
+
+table th {
+    width: 20%;
+}
+
+table td:first-child,
+table th:first-child,
+table td:last-child,
+table th:last-child {
+    text-align: center;
+}
+
 
 .SearchBar>* {
     color: black;
@@ -43,4 +59,18 @@ table {
     justify-content: center;
     align-items: center;
     text-align: center;
+}
+
+.arrow {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-top: 2px solid #000;
+    border-right: 2px solid #000;
+    margin-left: 30px;
+    margin-bottom: 10px;
+}
+
+.arrow-bottom {
+    transform: rotate(135deg);
 }
