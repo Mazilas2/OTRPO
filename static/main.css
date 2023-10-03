@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
 
-body {
+body, html {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
         "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
@@ -44,9 +44,7 @@ table th {
 
 td {
     text-align: center;
-    text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 0;
     padding: 0 10px;
     font-size: 18px;
     font-weight: 400;
@@ -60,7 +58,6 @@ table td:last-child,
 table th:last-child {
     text-align: center;
 }
-
 
 .SearchBar>* {
     color: black;
@@ -76,33 +73,17 @@ table th:last-child {
 }
 
 .arrow {
-    display: inline-block;
     width: 15px;
     height: 15px;
     border-top: 2px solid #000;
     border-right: 2px solid #000;
     margin-left: 30px;
     margin-bottom: 10px;
-}
-
-.arrow-bottom {
     transform: rotate(135deg);
 }
 
-.arrow-backward {
-    transform: rotate(-135deg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.arrow-text {
-    display: block;
-    font-size: 13px;
-  }
-
 .pagination-container {
-    display: flex; /* Change to flex to make it horizontal */
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -114,26 +95,9 @@ table th:last-child {
     white-space: nowrap;
 }
 
-.pagination-number {
-    --size: 32px;
-    --margin: 6px;
-    margin: 0 var(--margin);
-    border-radius: 6px;
-    background: #202020;
-    max-width: auto;
-    min-width: var(--size);
-    height: var(--size);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 0 6px;
-    margin-right: 10px; /* Add margin between pagination numbers */
-}
-
 .page-item {
-    display: inline-block; /* Set list items to be inline */
-    margin: 0 3px; /* Add margin between items */
+    display: inline-block;
+    margin: 0 2px;
 }
 
 .page-link {
@@ -142,12 +106,6 @@ table th:last-child {
     background: #202020;
     padding: 6px 12px;
     border-radius: 6px;
-}
-
-.arrow-text {
-    display: block;
-    font-size: 13px;
-    padding: 7px 10px;
 }
 
 .page-link:hover {
