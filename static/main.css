@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -24,7 +26,7 @@ header {
     top: 0;
     background-color: #282c34;
     height: 100%;
-    width: 95vw;
+    width: 100%;
 }
 
 table {
@@ -38,6 +40,18 @@ table {
 
 table th {
     width: 20%;
+}
+
+td {
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 0;
+    padding: 0 10px;
+    font-size: 18px;
+    font-weight: 400;
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden;
 }
 
 table td:first-child,
@@ -73,4 +87,73 @@ table th:last-child {
 
 .arrow-bottom {
     transform: rotate(135deg);
+}
+
+.arrow-backward {
+    transform: rotate(-135deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.arrow-text {
+    display: block;
+    font-size: 13px;
+  }
+
+.pagination-container {
+    display: flex; /* Change to flex to make it horizontal */
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.pagination {
+    list-style-type: none;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.pagination-number {
+    --size: 32px;
+    --margin: 6px;
+    margin: 0 var(--margin);
+    border-radius: 6px;
+    background: #202020;
+    max-width: auto;
+    min-width: var(--size);
+    height: var(--size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0 6px;
+    margin-right: 10px; /* Add margin between pagination numbers */
+}
+
+.page-item {
+    display: inline-block; /* Set list items to be inline */
+    margin: 0 3px; /* Add margin between items */
+}
+
+.page-link {
+    text-decoration: none;
+    color: white;
+    background: #202020;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.arrow-text {
+    display: block;
+    font-size: 13px;
+    padding: 7px 10px;
+}
+
+.page-link:hover {
+    background: #2c2c2c;
+}
+
+.page-item.active>* {
+    background: #2c2c2c;
 }
