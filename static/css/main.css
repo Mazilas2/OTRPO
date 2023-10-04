@@ -72,6 +72,18 @@ table th:last-child {
     text-align: center;
 }
 
+.searchBtn {
+    background-color: #202020;
+    border: none;
+    border-radius: 1px;
+    margin-left: 10px;
+    cursor: pointer;
+    outline: none;
+    color:white;
+    height: 36px;
+    margin: 0;
+}
+
 .arrow {
     width: 15px;
     height: 15px;

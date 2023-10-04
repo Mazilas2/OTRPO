@@ -2,7 +2,7 @@
 import json
 import datetime
 import requests
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 ITEMS_PER_PAGE = 20
@@ -62,22 +62,34 @@ def update_data(config, config_path="config.json"):
     save_config(config, config_path)
 
 
-@app.route("/", defaults={"page": 1})
-@app.route("/<int:page>")
-def main(page=1):
+@app.route("/", defaults={"page": 1, "search_query": ""})
+@app.route("/<int:page>", defaults={"search_query": ""})
+@app.route("/search/<search_query>/<int:page>")
+@app.route("/search/1")
+def main(page=1, search_query=""):
     """Главная страница с пагинацией"""
     config = get_config()
     if check_update(config):
         update_data(config)
     # Get data from config file
-    count = config["count"]
     # Get page number from url
     if page:
         page = page - 1
-    data = config["data"][page * ITEMS_PER_PAGE: (page + 1) * ITEMS_PER_PAGE]
+    if search_query:
+        # Filter data by search query (name)
+        data = list(filter(lambda x: search_query.lower() in x["name"].lower(), config["data"]))
+        count = len(data)
+        print(len(data))
+        num_pages = (len(data) // ITEMS_PER_PAGE) + 1
+        data = data[page * ITEMS_PER_PAGE: (page+1) * ITEMS_PER_PAGE]
+    else:
+        data = config["data"][page * ITEMS_PER_PAGE: (page + 1) * ITEMS_PER_PAGE]
+        count = config["count"]
     # Get count of pages
     num_pages = count // ITEMS_PER_PAGE
-    return render_template("index.html", data=data, num_pages=num_pages, page=page + 1)
+    if count % ITEMS_PER_PAGE:
+        num_pages += 1
+    return render_template("index.html", data=data, num_pages=num_pages, page=page + 1, search_query=search_query)
 
 
 @app.route('/<name>')

@@ -4,40 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemons</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='card.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/card.css') }}">
+    <script src="{{ url_for('static', filename='./js/main.js') }}"></script>
 </head>
 <body>
     <div class="App">
         <header>
             <div class="SearchBar">
-                <input type="text" placeholder="Search.." id="search">
+                <input type="text" placeholder="Search.." id="search" value="{{ search_query }}">
+                <button type="submit" id="searchBtn" class="searchBtn">Search</button>
             </div>
             <div class="pagination-container">
                 <!-- Pagination links go here -->
                 {% if page > 1 %}
-                <a href="{{ url_for('main', page=page-1) }}" class="arrow-text page-link">← Previous</a>
+                <a href="{{ url_for('main', page=page-1, search_query=search_query) }}" class="arrow-text page-link">← Previous</a>
                 {% endif %}
                 <ul class="pagination">
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main', page=1) }}">1</a>
+                        <a class="page-link" href="{{ url_for('main', page=1, search_query=search_query) }}">1</a>
                     </li>
                     {% for page_num in range(page - 2, page + 3) %}
                     {% if page_num > 1 and page_num < num_pages %}
                     <li class="page-item {% if page_num == page %}active{% endif %}">
-                        <a class="page-link" href="{{ url_for('main', page=page_num) }}">{{ page_num }}</a>
+                        <a class="page-link" href="{{ url_for('main', page=page_num, search_query=search_query) }}">{{ page_num }}</a>
                     </li>
                     {% endif %}
                     {% endfor %}
-                    {% if page < num_pages %}
+                    {% if page <= num_pages %}
+                    {% if num_pages > 1 %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main', page=num_pages) }}">{{ num_pages }}</a>
+                        <a class="page-link" href="{{ url_for('main', page=num_pages, search_query=search_query) }}">{{ num_pages }}</a>
                     </li>
+                    {% endif %}
                     {% endif %}
                 </ul>
                 {% if page < num_pages %}
-                <a href="{{ url_for('main', page=page+1) }}" class="arrow-text page-link">→</a>
+                <a href="{{ url_for('main', page=page+1, search_query=search_query) }}" class="arrow-text page-link">→</a>
                 {% endif %}
             </div>
         </header>
