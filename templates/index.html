@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='./css/card.css') }}">
     <script src="{{ url_for('static', filename='./js/main.js') }}"></script>
 </head>
+
 <body>
     <div class="App">
         <header>
@@ -18,53 +20,83 @@
             <div class="pagination-container">
                 <!-- Pagination links go here -->
                 {% if page > 1 %}
-                <a href="{{ url_for('main', page=page-1, search_query=search_query) }}" class="arrow-text page-link">← Previous</a>
+                <a href="{{ url_for('main', page=page-1, search_query=search_query) }}" class="arrow-text page-link">←
+                    Previous</a>
                 {% endif %}
                 <ul class="pagination">
                     <li class="page-item">
                         <a class="page-link" href="{{ url_for('main', page=1, search_query=search_query) }}">1</a>
                     </li>
                     {% for page_num in range(page - 2, page + 3) %}
-                    {% if page_num > 1 and page_num < num_pages %}
-                    <li class="page-item {% if page_num == page %}active{% endif %}">
-                        <a class="page-link" href="{{ url_for('main', page=page_num, search_query=search_query) }}">{{ page_num }}</a>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                    {% if page <= num_pages %}
-                    {% if num_pages > 1 %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ url_for('main', page=num_pages, search_query=search_query) }}">{{ num_pages }}</a>
-                    </li>
-                    {% endif %}
-                    {% endif %}
+                    {% if page_num > 1 and page_num < num_pages %} <li
+                        class="page-item {% if page_num == page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('main', page=page_num, search_query=search_query) }}">{{
+                            page_num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        {% if page <= num_pages %} {% if num_pages> 1 %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="{{ url_for('main', page=num_pages, search_query=search_query) }}">{{ num_pages
+                                    }}</a>
+                            </li>
+                            {% endif %}
+                            {% endif %}
                 </ul>
-                {% if page < num_pages %}
-                <a href="{{ url_for('main', page=page+1, search_query=search_query) }}" class="arrow-text page-link">→</a>
-                {% endif %}
+                {% if page < num_pages %} <a href="{{ url_for('main', page=page+1, search_query=search_query) }}"
+                    class="arrow-text page-link">→</a>
+                    {% endif %}
             </div>
         </header>
-        <table id="tableBody">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>URL</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in data %}
-                <tr>
-                    <td>{{ item.index }}</td>
-                    <td><img src="{{ item.img_url }}" alt="{{ item.name }} image"></td>
-                    <td><a href="{{ url_for('pokemon', name=item.name) }}">{{ item.name }}</a></td>
-                    <td>{{ item.url }}</td>
-                    <td class="pkmn-arrows"><span class="arrow arrow-bottom"></span></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% for item in data %}
+        <div class="content-cards">
+            <div class="card">
+                <div class="card-header">
+                    <div class="red-circle">
+                        <h2><a href="{{url_for('pokemon', name=item.name)}}">{{ item.name }}</a></h2>
+                    </div>
+                    <img src="{{ item.img_url }}" alt="{{ item.name }} onerror="this.src='https://i.imgur.com/0d7XV3X.png'>
+                    <script>
+                        document.querySelector('img').addEventListener('error', function () {
+                            this.src = 'https://i.imgur.com/0d7XV3X.png'
+                        })
+                    </script>
+                </div>
+                <div class="card-content">
+                    <div class="card-content-type">
+                        <p><b>Type:</b></p>
+                        {% for type in item.types %}
+                            <div class="pkmn-type">{{ type }}</div>
+                        {% endfor %}
+                        
+                    </div>
+                    <div class="card-content-stats">
+                        <b>Stats:</b>
+                        <p><b>HP:</b> {{ item.stats.hp }} 
+                            <span class="stat-line" style="width: {{ (item.stats.hp / 255) * 100 }}%;"></span>
+                        </p>
+                        <p><b>Attack:</b> {{ item.stats.attack }} 
+                            <span class="stat-line" style="width: {{ (item.stats.attack / 190) * 100 }}%;"></span>
+                        </p>
+                        <p><b>Defense:</b> {{ item.stats.defense }} 
+                            <span class="stat-line" style="width: {{ (item.stats.defense / 250) * 100 }}%;"></span>
+                        </p>
+                        <p><b>Special Attack:</b> {{ item.stats["special-attack"] }} 
+                            <span class="stat-line" style="width: {{ (item.stats["special-attack"] / 194) * 100 }}%;"></span>
+                        </p>
+                        <p><b>Special Defense:</b> {{ item.stats["special-defense"] }} 
+                            <span class="stat-line" style="width: {{ (item.stats["special-defense"] / 250) * 100 }}%;"></span>
+                        </p>
+                        <p><b>Speed:</b> {{ item.stats.speed }} 
+                            <span class="stat-line" style="width: {{ (item.stats.speed / 200) * 100 }}%;"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </body>
+
 </html>

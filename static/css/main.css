@@ -27,6 +27,7 @@ header {
     background-color: #282c34;
     height: 100%;
     width: 100%;
+    z-index: 1;
 }
 
 table {

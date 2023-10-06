@@ -61,6 +61,21 @@ def update_data(config, config_path="config.json"):
     # Save data to config file
     save_config(config, config_path)
 
+def update_pokemon_data(data, config):
+    for pkmn in data:
+        if "stats" not in pkmn:
+            pkmn_data = get_data(pkmn["url"])
+            # Remain only "name" and "base_stat" from stats
+            pkmn["stats"] = {}
+            for stat in pkmn_data["stats"]:
+                stat_name = stat["stat"]["name"]
+                base_stat = stat["base_stat"]
+                pkmn["stats"][stat_name] = base_stat
+            # Get types from pkmn_data["types"], remain only name of each type
+            pkmn["types"] = []
+            for pkmn_type in pkmn_data["types"]:
+                pkmn["types"].append(pkmn_type["type"]["name"])
+            save_config(config)
 
 @app.route("/", defaults={"page": 1, "search_query": ""})
 @app.route("/<int:page>", defaults={"search_query": ""})
@@ -82,8 +97,11 @@ def main(page=1, search_query=""):
         print(len(data))
         num_pages = (len(data) // ITEMS_PER_PAGE) + 1
         data = data[page * ITEMS_PER_PAGE: (page+1) * ITEMS_PER_PAGE]
+        update_pokemon_data(data, config)
     else:
         data = config["data"][page * ITEMS_PER_PAGE: (page + 1) * ITEMS_PER_PAGE]
+        # If there no pkmn["stats"] in data, get them from url, then save to config file
+        update_pokemon_data(data, config)
         count = config["count"]
     # Get count of pages
     num_pages = count // ITEMS_PER_PAGE
