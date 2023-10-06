@@ -18,14 +18,31 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.red-circle').forEach((element) => {
         observer.observe(element);
     });
+    // Do the same for .black-circle
+    const observer2 = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('black-circle-animation');
+            }
+      });
+    });
+    document.querySelectorAll('.black-circle').forEach((element) => {
+        observer2.observe(element);
+    }
+    );
     // Get from local storage current pokemon name
     update_selected_pokemon();
-
+    // Get each element with class pkmn-type
+    document.querySelectorAll('.pkmn-type').forEach((element) => {
+        // Get text from element
+        let type = element.innerHTML;
+        // Change background color of element
+        element.style.backgroundColor = colours[type];
+    });
 });
 
 function filter_table() {
     let filter = document.querySelector('#search').value.toUpperCase();
-    // On click - go to @app.route('/search/<name>/<int:page>')
     window.location.href = '/search/' + filter + '/1';
 }
 
@@ -63,3 +80,24 @@ function update_selected_pokemon() {
         }
     });
 }
+
+const colours = {
+	normal: '#A8A77A',
+	fire: '#EE8130',
+	water: '#6390F0',
+	electric: '#F7D02C',
+	grass: '#7AC74C',
+	ice: '#96D9D6',
+	fighting: '#C22E28',
+	poison: '#A33EA1',
+	ground: '#E2BF65',
+	flying: '#A98FF3',
+	psychic: '#F95587',
+	bug: '#A6B91A',
+	rock: '#B6A136',
+	ghost: '#735797',
+	dragon: '#6F35FC',
+	dark: '#705746',
+	steel: '#B7B7CE',
+	fairy: '#D685AD',
+};

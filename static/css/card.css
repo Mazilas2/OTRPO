@@ -51,9 +51,22 @@
     clip-path: circle(65% at 50% 0%);
     background: #ff0000;
     transition: 0.5s;
+    z-index: 1;
 }
 
-@keyframes wipe-enter {
+.card .card-header .black-circle {
+    position: absolute;
+    top: 0%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: circle(70% at 50% 0%);
+    background: #151515;
+    transition: 0.5s;
+    z-index: 0;
+}
+
+@keyframes wipe-enter-red {
     0% {
         clip-path: circle(20% at 50% 0%);
     }
@@ -62,9 +75,21 @@
     }
 }
 
+@keyframes wipe-enter-black {
+    0% {
+        clip-path: circle(20% at 50% 0%);
+    }
+    100% {
+        clip-path: circle(70% at 50% 0%);
+    }
+}
+
 @media (prefers-reduced-motion: no-preference) {
     .red-circle-animation {
-        animation: wipe-enter 0.5s;
+        animation: wipe-enter-red 0.5s;
+    }
+    .black-circle-animation {
+        animation: wipe-enter-black 0.5s;
     }
 }
 
@@ -132,6 +157,7 @@
     transition: 0.5s;
     box-shadow: 0 10px 25px 5px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
+    text-align: center;
 }
 
 .card .card-content .card-content-stats span {

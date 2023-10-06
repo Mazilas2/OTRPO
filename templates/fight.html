@@ -5,10 +5,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokemons</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='./css/card.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/fight.css') }}">
     <script src="{{ url_for('static', filename='./js/fight.js') }}"></script>
+    <script>
+        var pkmnName = "{{ pkmn_name }}";
+    </script>
 </head>
 
 <body>
-    
+    <header>
+
+    </header>
+    <div class="content">
+        <div class="my-pokemon">
+            <div class="Bar">
+                <div class="name">
+                    <img src="" alt="" id="my-pokemon-img">
+                    <p id="my-pokemon-name"></p>
+                </div>
+                <div class="hp">
+                    <p>Current HP:</p>
+                    <span id="hp-count-my-current"></span>
+                    /
+                    <span id="hp-count-my"></span>
+                    <span id="hp-line-my" class="hp-line"></span>
+                </div>
+            </div>
+        </div>
+        <div class="fight">
+            <button class="attack" onclick="attack()">Attack</button>
+            <textarea class="fight-log" readonly id="fight-log">
+
+            </textarea>
+        </div>
+        <div class="enemy-pokemon">
+            <div class="Bar">
+                <div class="name">
+                    <img src="" alt="" id="enemy-pokemon-img">
+                    <p id="enemy-pokemon-name"></p>
+                </div>
+                <div class="hp">
+                    <p>Current HP:</p>
+                    <span id="hp-count-enemy-current"></span>
+                    /
+                    <span id="hp-count-enemy"></span>
+                    <span id="hp-line-enemy" class="hp-line"></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
