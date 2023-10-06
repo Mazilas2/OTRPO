@@ -8,11 +8,11 @@ body, html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    width: 100%;
     background-color: #282c34;
 }
 
 .App {
-    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -22,12 +22,15 @@ body, html {
 }
 
 header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: sticky;
     top: 0;
     background-color: #282c34;
     height: 100%;
     width: 100%;
-    z-index: 1;
+    z-index: 2;
 }
 
 table {
@@ -127,4 +130,38 @@ table th:last-child {
 
 .page-item.active>* {
     background: #2c2c2c;
+}
+
+header .fight-btn {
+    width: 15%;
+    height: 30px;
+    margin: 0;
+    margin-top: 10px;
+    background: #202020;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+}
+
+header .fight-btn .btn {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: none;
+    color: white;
+    
+}
+
+header .fight-btn:hover {
+    background: #2c2c2c;
+    transition: 0.3s;
 }

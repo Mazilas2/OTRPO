@@ -1,6 +1,7 @@
 """Приложение Flask"""
 import json
 import datetime
+import random
 import requests
 from flask import Flask, render_template, request
 
@@ -62,6 +63,7 @@ def update_data(config, config_path="config.json"):
     save_config(config, config_path)
 
 def update_pokemon_data(data, config):
+    """Обновить данные по покемонам (stats, types)"""
     for pkmn in data:
         if "stats" not in pkmn:
             pkmn_data = get_data(pkmn["url"])
@@ -76,6 +78,7 @@ def update_pokemon_data(data, config):
             for pkmn_type in pkmn_data["types"]:
                 pkmn["types"].append(pkmn_type["type"]["name"])
             save_config(config)
+    return data
 
 @app.route("/", defaults={"page": 1, "search_query": ""})
 @app.route("/<int:page>", defaults={"search_query": ""})
@@ -97,11 +100,11 @@ def main(page=1, search_query=""):
         print(len(data))
         num_pages = (len(data) // ITEMS_PER_PAGE) + 1
         data = data[page * ITEMS_PER_PAGE: (page+1) * ITEMS_PER_PAGE]
-        update_pokemon_data(data, config)
+        data = update_pokemon_data(data, config)
     else:
         data = config["data"][page * ITEMS_PER_PAGE: (page + 1) * ITEMS_PER_PAGE]
         # If there no pkmn["stats"] in data, get them from url, then save to config file
-        update_pokemon_data(data, config)
+        data = update_pokemon_data(data, config)
         count = config["count"]
     # Get count of pages
     num_pages = count // ITEMS_PER_PAGE
@@ -115,3 +118,24 @@ def pokemon(name):
     """Получить данные по имени покемона"""
     pokemon_name = name.capitalize()
     return render_template("pokemon.html", title=pokemon_name)
+
+@app.route('/fight')
+def fight():
+    """Получить данные по имени покемона"""
+    return render_template("fight.html")
+
+@app.route('/get_pokemon')
+def get_pokemon(pokemon_name):
+    """Получить данные по имени покемона"""
+    config = get_config()
+    if check_update(config):
+        update_data(config)
+    data = config["data"]
+    pkmn = []
+    for p in data:
+        if p["name"] == pokemon_name:
+            pkmn = p
+            break
+    # If there no pkmn["stats"] in data, get them from url, then save to config file
+    update_pokemon_data
+    return pokemon
