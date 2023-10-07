@@ -34,8 +34,6 @@ def save_config(config, path="config.json"):
     with open(path, "w", encoding="utf-8") as file:
         json.dump(config, file)
 
-# Create def for checking is update needed
-
 
 def check_update(config):
     """Проверить, нужно ли обновлять данные"""
@@ -53,14 +51,12 @@ def update_data(config, config_path="config.json"):
     config["last_update"] = now.strftime("%Y-%m-%d %H:%M:%S")
     url = f'https://pokeapi.co/api/v2/pokemon?limit={count}&offset=0'
     data = get_data(url)["results"]
-    # For each pokemon add them index (number in list) and image url
     for index, pkmn in enumerate(data):
         pkmn["index"] = index + 1
         img_base = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
         pkmn_id = pkmn['url'].split('/')[-2]
         pkmn["img_url"] = f"{img_base}{pkmn_id}.png"
     config["data"] = data
-    # Save data to config file
     save_config(config, config_path)
 
 
@@ -69,13 +65,11 @@ def update_pokemon_data(data, config):
     for pkmn in data:
         if "stats" not in pkmn:
             pkmn_data = get_data(pkmn["url"])
-            # Remain only "name" and "base_stat" from stats
             pkmn["stats"] = {}
             for stat in pkmn_data["stats"]:
                 stat_name = stat["stat"]["name"]
                 base_stat = stat["base_stat"]
                 pkmn["stats"][stat_name] = base_stat
-            # Get types from pkmn_data["types"], remain only name of each type
             pkmn["types"] = []
             for pkmn_type in pkmn_data["types"]:
                 pkmn["types"].append(pkmn_type["type"]["name"])
@@ -92,12 +86,9 @@ def main(page=1, search_query=""):
     config = get_config()
     if check_update(config):
         update_data(config)
-    # Get data from config file
-    # Get page number from url
     if page:
         page = page - 1
     if search_query:
-        # Filter data by search query (name)
         data = list(filter(lambda x: search_query.lower()
                     in x["name"].lower(), config["data"]))
         count = len(data)
@@ -108,10 +99,8 @@ def main(page=1, search_query=""):
     else:
         data = config["data"][page *
                               ITEMS_PER_PAGE: (page + 1) * ITEMS_PER_PAGE]
-        # If there no pkmn["stats"] in data, get them from url, then save to config file
         data = update_pokemon_data(data, config)
         count = config["count"]
-    # Get count of pages
     num_pages = count // ITEMS_PER_PAGE
     if count % ITEMS_PER_PAGE:
         num_pages += 1
@@ -128,7 +117,6 @@ def pokemon(name):
 @app.route('/fight')
 def fight():
     """Получить данные по имени покемона"""
-    # Get random pokemon name
     config = get_config()
     rnd_pkmn = random.choice(config["data"])
     pkmn_name = rnd_pkmn["name"]
@@ -148,12 +136,12 @@ def get_pokemon():
         if p["name"] == pokemon_name:
             pkmn = p
             break
-    # If there no pkmn["stats"] in data, get them from url, then save to config file
     return update_pokemon_data([pkmn], config)
 
 
 @app.route('/save_winner', methods=['POST'])
 def save_winner():
+    """Сохранить победителя"""
     winner = request.json['winner']
     # Handle saving the winner to your data store or perform any other necessary actions
     # ...

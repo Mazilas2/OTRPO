@@ -24,16 +24,20 @@
                     <p id="my-pokemon-name"></p>
                 </div>
                 <div class="hp">
-                    <p>Current HP:</p>
-                    <span id="hp-count-my-current"></span>
-                    /
-                    <span id="hp-count-my"></span>
-                    <span id="hp-line-my" class="hp-line"></span>
+                    <div>Current HP:</div><div class="sec-brd"><div id="hp-line-my" class="hp-line"></div></div>
+                    <p>
+                        <span id="hp-count-my-current"></span>
+                        /
+                        <span id="hp-count-my"></span>
+                    </p>
                 </div>
             </div>
         </div>
         <div class="fight">
-            <button class="attack" onclick="attack()">Attack</button>
+            <div class="fight-btn">
+                <p class="arrow">→</p>
+                <button class="btn-attack" onclick="attack()">FIGHT</button>
+            </div>
             <textarea class="fight-log" readonly id="fight-log">
 
             </textarea>
@@ -45,11 +49,13 @@
                     <p id="enemy-pokemon-name"></p>
                 </div>
                 <div class="hp">
-                    <p>Current HP:</p>
-                    <span id="hp-count-enemy-current"></span>
-                    /
-                    <span id="hp-count-enemy"></span>
-                    <span id="hp-line-enemy" class="hp-line"></span>
+                    <div>Current HP:</div><div id="hp-line-enemy" class="hp-line"></div>
+                    <p>
+                        <span id="hp-count-enemy-current"></span>
+                        /
+                        <span id="hp-count-enemy"></span>
+                    </p>
+                    
                 </div>
             </div>
         </div>

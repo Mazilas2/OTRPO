@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 body, html {
     margin: 0;
     padding: 0;
@@ -13,10 +15,20 @@ body, html {
     align-items: center;
     width: 100%;
     height: 100%;
+    font-family: 'Press Start 2P', cursive;
 }
 
 .content .my-pokemon {
-    width: calc(100% / 3);
+    width: calc(100% / 3.5);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.content .enemy-pokemon {
+    width: calc(100% / 3.5);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -25,16 +37,44 @@ body, html {
 }
 
 .content .fight {
-    width: calc(100% / 3);
+    width: calc(100% / 4);
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     gap: 50px;
     align-items: center;
+    overflow: hidden;
+    align-items: center;
 }
 
+.content .fight .arrow {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-size: 80px;
+    color: white;
+}
 
+.content .fight .fight-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-direction: column;
+}
+.content .fight .btn-attack {
+    background: crimson;
+    padding: 20px 0px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: calc(1vh + 1vw);
+    width: 60%;
+    display: flex;
+    justify-content: center;
+}
 
 .content .fight .fight-log {
     width: 90%;
@@ -50,14 +90,7 @@ body, html {
     font-size: 9px;
 }
 
-.content .enemy-pokemon {
-    width: calc(100% / 3);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+
 
 .content .Bar {
     display: flex;
@@ -69,6 +102,7 @@ body, html {
     border-radius: 10px;
     margin-bottom: 10px;
     gap: 10px;
+    box-shadow: 10px 10px 2px 0 rgba(0, 0, 0, 0.8);
 }
 
 .content .Bar .name {
@@ -76,6 +110,7 @@ body, html {
     width: 100%;
     height: 35%;
     background: blue;
+    overflow: hidden;
 }
 
 .content .Bar .hp {
@@ -83,6 +118,22 @@ body, html {
     height: 35%;
     background: #ff0000;
     background: transparent;
+    padding: 0 15px;
+    overflow: hidden;
+}
+
+.content .Bar .hp p {
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+    position: relative;
+    top: 20px;
+    overflow: hidden;
+}
+
+.content .Bar .hp div {
+    overflow: hidden;
 }
 
 .content .Bar .hp-line {
@@ -90,4 +141,8 @@ body, html {
     height: 10px;
     background: #00ff00;
     transition: 0.5s;
+    border-radius: 10px;
+    border: 2px solid white;
+    width: 80%;
+    overflow: hidden;
 }
