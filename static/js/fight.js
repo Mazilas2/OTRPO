@@ -25,6 +25,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     document.querySelector('#my-pokemon-name').innerHTML = pkmn_1['name'].toUpperCase();
     document.querySelector('#enemy-pokemon-name').innerHTML = pkmn_2['name'].toUpperCase();
+
+    var fight_input = document.querySelector('#fight-input');
+
+    fight_input.addEventListener('input', () => {
+        if (fight_input.value.length > 0) {
+            document.querySelector('#fight-btn').disabled = false;
+        } else {
+            document.querySelector('#fight-btn').disabled = true;
+        }
+    });
+
+    document.querySelector('#fight-log').value = "";
 });
 
 function get_pokemon(pokemon_name) {
@@ -53,69 +65,78 @@ function sleep(ms) {
 }
 
 function attack() {
-    document.querySelector('#fight-log').innerHTML = "";
+    
     var winner = "";
-    while (winner == "") {
-        var user_attack = Math.floor(Math.random() * 10) + 1;
-        var enemy_attack = Math.floor(Math.random() * 10) + 1;
-        var result = isEvenOrOdd(user_attack, enemy_attack);
-        var damage = Math.floor(Math.random() * 10) + 10;
-        if (result) {
-            // Attack enemy
-            var enemy_hp = document.querySelector('#hp-count-enemy-current').innerHTML;
-            enemy_hp = parseInt(enemy_hp);
-            enemy_hp = enemy_hp - damage;
-            if (enemy_hp <= 0) {
-                enemy_hp = 0;
-                winner = "user";
-            }
-            document.querySelector('#hp-count-enemy-current').innerHTML = enemy_hp;
-            // Change width of hp bar (hp-line-enemy) (hp-count-enemy/enemy_hp)
-            var enemy_hp_all = document.querySelector('#hp-count-enemy').innerHTML;
-            enemy_hp = parseFloat(enemy_hp);
-            enemy_hp_all = parseFloat(enemy_hp_all);
-            var percent = enemy_hp / enemy_hp_all * 100;
-            document.querySelector('#hp-line-enemy').style.width = percent + '%';
+    var user_attack = document.querySelector('#fight-input').value;
+    var enemy_attack = Math.floor(Math.random() * 10) + 1;
+    var result = isEvenOrOdd(user_attack, enemy_attack);
+    var damage = Math.floor(Math.random() * 10) + 10;
+    if (result) {
+        // Attack enemy
+        var enemy_hp = document.querySelector('#hp-count-enemy-current').innerHTML;
+        enemy_hp = parseInt(enemy_hp);
+        enemy_hp = enemy_hp - damage;
+        if (enemy_hp <= 0) {
+            enemy_hp = 0;
+            winner = "user";
+        }
+        document.querySelector('#hp-count-enemy-current').innerHTML = enemy_hp;
+        // Change width of hp bar (hp-line-enemy) (hp-count-enemy/enemy_hp)
+        var enemy_hp_all = document.querySelector('#hp-count-enemy').innerHTML;
+        enemy_hp = parseFloat(enemy_hp);
+        enemy_hp_all = parseFloat(enemy_hp_all);
+        var percent = enemy_hp / enemy_hp_all * 100;
+        document.querySelector('#hp-line-enemy').style.width = percent + '%';
 
-        } else {
-            // Attack user
-            var user_hp = document.querySelector('#hp-count-my-current').innerHTML;
-            user_hp = parseInt(user_hp);
-            user_hp = user_hp - damage;
-            if (user_hp <= 0) {
-                user_hp = 0;
-                winner = "enemy";
-            }
-            document.querySelector('#hp-count-my-current').innerHTML = user_hp;
-            var user_hp_all = document.querySelector('#hp-count-my').innerHTML;
-            user_hp = parseFloat(user_hp);
-            user_hp_all = parseFloat(user_hp_all);
-            var percent = user_hp / user_hp_all * 100;
-            if (percent <= 0) {
-                percent = 0;
-            }
-            document.querySelector('#hp-line-my').style.width = percent + '%';
-        }
-        var get_damager = "";
-        if (result) {
-            get_damager = "Игроку";
-        } else {
-            get_damager = "Противнику";
-        }
-        var fight_log = document.querySelector('#fight-log').innerHTML;
-        fight_log = fight_log + `Игроку выпало ${user_attack}, противнику выпало ${enemy_attack}, нанесено ${damage} урона ${get_damager}\n`;
-        document.querySelector('#fight-log').innerHTML = fight_log;
-    }
-    var winner_ = "";
-    if (winner == "user") {
-        winner_ = "Игрок";
     } else {
-        winner_ = "Противник";
+        // Attack user
+        var user_hp = document.querySelector('#hp-count-my-current').innerHTML;
+        user_hp = parseInt(user_hp);
+        user_hp = user_hp - damage;
+        if (user_hp <= 0) {
+            user_hp = 0;
+            winner = "enemy";
+        }
+        document.querySelector('#hp-count-my-current').innerHTML = user_hp;
+        var user_hp_all = document.querySelector('#hp-count-my').innerHTML;
+        user_hp = parseFloat(user_hp);
+        user_hp_all = parseFloat(user_hp_all);
+        var percent = user_hp / user_hp_all * 100;
+        if (percent <= 0) {
+            percent = 0;
+        }
+        document.querySelector('#hp-line-my').style.width = percent + '%';
     }
-    var fight_log = document.querySelector('#fight-log').innerHTML;
-    fight_log = fight_log + `Победил ${winner_}`;
-    document.querySelector('#fight-log').innerHTML = fight_log;
-    saveWinner(winner_);
+    var get_damager = "";
+    if (result) {
+        get_damager = "Игроку";
+    } else {
+        get_damager = "Противнику";
+    }
+    var fight_log = document.querySelector('#fight-log').value;
+    console.log(fight_log);
+    fight_log = fight_log + `Игроку выпало ${user_attack}, противнику выпало ${enemy_attack}, нанесено ${damage} урона ${get_damager} \n`;
+    document.querySelector('#fight-log').value = fight_log;
+    var winner_ = "";
+    if (winner != "") {
+        if (winner == "user") {
+            winner_ = "Игрок";
+        } else {
+            winner_ = "Противник";
+        }
+        var fight_log = document.querySelector('#fight-log').value
+        fight_log = fight_log + `Победил ${winner_}`;
+        document.querySelector('#fight-log').value = fight_log;
+        saveWinner(winner_);
+
+        document.querySelector('#fight-input').value = "";
+        document.querySelector('#fight-btn').disabled = true;
+        document.querySelector('#hp-count-my-current').innerHTML = document.querySelector('#hp-count-my').innerHTML;
+        document.querySelector('#hp-count-enemy-current').innerHTML = document.querySelector('#hp-count-enemy').innerHTML;
+        document.querySelector('#hp-line-my').style.width = '80%';
+        document.querySelector('#hp-line-enemy').style.width = '80%';
+        
+    }
 }
 
 function saveWinner(winner) {
@@ -124,7 +145,11 @@ function saveWinner(winner) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ winner: winner }),
+        body: JSON.stringify({ 
+            user_pkmn: localStorage.getItem('current_pokemon'),
+            enemy_pkmn: pkmnName,
+            winner: winner 
+        }),
     })
         .then(response => {
             if (response.ok) {

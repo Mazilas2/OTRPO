@@ -3,12 +3,32 @@ import json
 import datetime
 import random
 import requests
-import psycopg2
 from flask import Flask, render_template, request
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import Column, Integer, String, inspect
+
 
 app = Flask(__name__)
 ITEMS_PER_PAGE = 20
 now = datetime.datetime.now()
+engine = create_engine("sqlite:///pokemons.db", echo=True)
+Session = sessionmaker(bind=engine)
+
+
+class Base(DeclarativeBase):
+    """Базовый класс для работы с таблицами"""
+    pass
+
+
+class Results(Base):
+    """Класс для работы с таблицей результатов"""
+
+    __tablename__ = "results"
+    id = Column(Integer, primary_key=True)
+    user_pkmn = Column(String)
+    enemy_pkmn = Column(String)
+    winner = Column(String)
 
 
 def get_data(url):
@@ -38,23 +58,24 @@ def save_config(config, path="config.json"):
 def check_update(config):
     """Проверить, нужно ли обновлять данные"""
     last_update = config["last_update"]
-    last_update_datetime = datetime.datetime.strptime(
-        last_update, "%Y-%m-%d %H:%M:%S")
+    last_update_datetime = datetime.datetime.strptime(last_update, "%Y-%m-%d %H:%M:%S")
     return (now - last_update_datetime).days > 0
 
 
 def update_data(config, config_path="config.json"):
     """Обновить данные"""
-    url_count = 'https://pokeapi.co/api/v2/pokemon'
+    url_count = "https://pokeapi.co/api/v2/pokemon"
     count = get_data(url_count)["count"]
     config["count"] = count
     config["last_update"] = now.strftime("%Y-%m-%d %H:%M:%S")
-    url = f'https://pokeapi.co/api/v2/pokemon?limit={count}&offset=0'
+    url = f"https://pokeapi.co/api/v2/pokemon?limit={count}&offset=0"
     data = get_data(url)["results"]
     for index, pkmn in enumerate(data):
         pkmn["index"] = index + 1
-        img_base = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
-        pkmn_id = pkmn['url'].split('/')[-2]
+        img_base = (
+            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
+        )
+        pkmn_id = pkmn["url"].split("/")[-2]
         pkmn["img_url"] = f"{img_base}{pkmn_id}.png"
     config["data"] = data
     save_config(config, config_path)
@@ -89,32 +110,38 @@ def main(page=1, search_query=""):
     if page:
         page = page - 1
     if search_query:
-        data = list(filter(lambda x: search_query.lower()
-                    in x["name"].lower(), config["data"]))
+        data = list(
+            filter(lambda x: search_query.lower() in x["name"].lower(), config["data"])
+        )
         count = len(data)
         print(len(data))
         num_pages = (len(data) // ITEMS_PER_PAGE) + 1
-        data = data[page * ITEMS_PER_PAGE: (page+1) * ITEMS_PER_PAGE]
+        data = data[page * ITEMS_PER_PAGE : (page + 1) * ITEMS_PER_PAGE]
         data = update_pokemon_data(data, config)
     else:
-        data = config["data"][page *
-                              ITEMS_PER_PAGE: (page + 1) * ITEMS_PER_PAGE]
+        data = config["data"][page * ITEMS_PER_PAGE : (page + 1) * ITEMS_PER_PAGE]
         data = update_pokemon_data(data, config)
         count = config["count"]
     num_pages = count // ITEMS_PER_PAGE
     if count % ITEMS_PER_PAGE:
         num_pages += 1
-    return render_template("index.html", data=data, num_pages=num_pages, page=page + 1, search_query=search_query)
+    return render_template(
+        "index.html",
+        data=data,
+        num_pages=num_pages,
+        page=page + 1,
+        search_query=search_query,
+    )
 
 
-@app.route('/<name>')
+@app.route("/<name>")
 def pokemon(name):
     """Получить данные по имени покемона"""
     pokemon_name = name.capitalize()
     return render_template("pokemon.html", title=pokemon_name)
 
 
-@app.route('/fight')
+@app.route("/fight")
 def fight():
     """Получить данные по имени покемона"""
     config = get_config()
@@ -123,10 +150,10 @@ def fight():
     return render_template("fight.html", pkmn_name=pkmn_name)
 
 
-@app.route('/get_pokemon', methods=['GET'])
+@app.route("/get_pokemon", methods=["GET"])
 def get_pokemon():
     """Получить данные по имени покемона"""
-    pokemon_name = request.args.get('pokemon_name')
+    pokemon_name = request.args.get("pokemon_name")
     config = get_config()
     if check_update(config):
         update_data(config)
@@ -139,27 +166,20 @@ def get_pokemon():
     return update_pokemon_data([pkmn], config)
 
 
-@app.route('/save_winner', methods=['POST'])
+@app.route("/save_winner", methods=["POST"])
 def save_winner():
     """Сохранить победителя"""
-    winner = request.json['winner']
-    # Handle saving the winner to your data store or perform any other necessary actions
-    # ...
-    # Connect to database
-    try:
-        connection = psycopg2.connect(
-            host="your_host",
-            port="your_port",
-            database="your_database",
-            user="your_username",
-            password="your_password"
-        )
-        cursor = connection.cursor()
-        query = "INSERT INTO results (winner) VALUES (%s)"
-        cursor.execute(query, (winner,))
-        connection.commit()
-        print("Winner saved successfully")
-        return json.dumps({"response": "ok"})
-
-    except (Exception, psycopg2.Error) as error:
-        print("Error saving winner:", error)
+    # Check db for existance of table
+    inspector = inspect(engine)
+    if not inspector.has_table("results"):
+        Base.metadata.create_all(engine)
+        print("База данных и таблица созданы")
+    user_pkmn = request.json["user_pkmn"]
+    enemy_pkmn = request.json["enemy_pkmn"]
+    winner = request.json["winner"]
+    with Session(autoflush=False, bind=engine) as db:
+        result = Results(user_pkmn=user_pkmn, enemy_pkmn=enemy_pkmn, winner=winner)
+        db.add(result)
+        db.commit()
+        print(result.id)
+    return "ok"
