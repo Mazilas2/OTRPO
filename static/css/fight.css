@@ -50,6 +50,9 @@ body, html {
 
 .content .fight input {
     font-family: 'Press Start 2P', cursive;
+    font-size: calc(0.3w);
+    overflow: hidden;
+    max-width: 90%;
 }
 
 .content .fight .fight-btn {

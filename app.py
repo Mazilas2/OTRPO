@@ -149,11 +149,10 @@ def fight():
     pkmn_name = rnd_pkmn["name"]
     return render_template("fight.html", pkmn_name=pkmn_name)
 
-
-@app.route("/get_pokemon", methods=["GET"])
-def get_pokemon():
+# Сделано по шаблону
+@app.route("/pokemon/<pokemon_name>", methods=["GET"])
+def get_pokemon(pokemon_name):
     """Получить данные по имени покемона"""
-    pokemon_name = request.args.get("pokemon_name")
     config = get_config()
     if check_update(config):
         update_data(config)
@@ -183,3 +182,6 @@ def save_winner():
         db.commit()
         print(result.id)
     return "ok"
+
+@app.route("/pokemon/list", methods=["GET"])
+def pokemon_list(name="", limit=20,offset=0):

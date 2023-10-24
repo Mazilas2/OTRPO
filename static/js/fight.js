@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function get_pokemon(pokemon_name) {
-    return fetch(`/get_pokemon?pokemon_name=${pokemon_name}`)
+    return fetch(`/pokemon/${pokemon_name}`)
         .then(response => response.json())
         .then(data => {
             return data;
