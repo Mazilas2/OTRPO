@@ -2,7 +2,7 @@
 import Head from "next/head"
 import './page.css'
 import CustomBar from "@/components/Fight/Pokemon_bar"
-import { use, useEffect, useState } from "react";
+import { SetStateAction, use, useEffect, useState } from "react";
 
 export const metadata = {
     title: 'Fight',
@@ -39,6 +39,48 @@ const FightPage = () => {
 
     const [pokemonNameUser, setPokemonNameUser] = useState<string>("");
     const [pokemonIdUser, setPokemonIdUser] = useState<number>(0);
+
+    const [inputValue, setInputValue] = useState('');
+
+    const handleInputChange = (event: { target: { value: SetStateAction<string>; }; }) => {
+        setInputValue(event.target.value); // Update the state with the input value
+    };
+
+    const handleAttack = () => {
+        console.log('Attack');
+        let isAttackUser = null;
+        // Make request to /api/fight/ [POST] with parameter user_attack(inputValue)
+        fetch('/api/fight/', {
+            method: 'POST',
+            body: JSON.stringify({
+                user_attack: inputValue,
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then((Response) => Response.json())
+        .then((data) => {
+            console.log(data)
+            isAttackUser = data.isAttackUser;
+            if (isAttackUser) {
+                const prevValue = pokemonDataEnemy.cur_hp;
+                const damage = pokemonDataUser.stats.attack;
+                const newValue = prevValue - damage;
+                const updatedPokemonDataEnemy = { ...pokemonDataEnemy, cur_hp: newValue };
+                setPokemonDataEnemy(updatedPokemonDataEnemy);
+                console.log(updatedPokemonDataEnemy);
+            } else {
+                const prevValue = pokemonDataUser.cur_hp;
+                const damage = pokemonDataEnemy.stats.attack;
+                const newValue = prevValue - damage;
+                const updatedPokemonDataUser = { ...pokemonDataUser, cur_hp: newValue };
+                setPokemonDataUser(updatedPokemonDataUser);
+                console.log(updatedPokemonDataUser);
+            }
+        }
+        );
+    };
 
     useEffect(() => {
         const selectedPokemon = localStorage.getItem('selectedPokemon');
@@ -135,20 +177,18 @@ const FightPage = () => {
                 </div>
                 {/*  */}
                 <div className="fight">
-                    <input type="text" id="fight-input" placeholder="Enter your move here" />
+                    <input
+                        type="text"
+                        id="fight-input"
+                        placeholder="Enter your move here"
+                        value={inputValue}
+                        onChange={handleInputChange}
+                    />
                     <div className="fight-btn">
-                        <button 
-                        className="btn-attack" 
-                        id="fight-btn"
-                        onClick={() => {
-                            console.log('Attack');
-                            const prevValue = pokemonDataUser.cur_hp;
-                            const damage = 10;
-                            const newValue = prevValue - damage;
-                            const updatedPokemonDataUser = { ...pokemonDataUser, cur_hp: newValue };
-                            setPokemonDataUser(updatedPokemonDataUser);
-                            console.log(updatedPokemonDataUser);
-                        }}
+                        <button
+                            className="btn-attack"
+                            id="fight-btn"
+                            onClick={handleAttack}
                         >
                             FIGHT
                         </button>

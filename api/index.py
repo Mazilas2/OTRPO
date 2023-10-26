@@ -114,6 +114,7 @@ def get_pokemon_list():
         "search_query": search_query,
     }
 
+
 @app.route("/api/pokemon/getId", methods=["GET"])
 def get_pokemon_id():
     """Получить id покемона по имени"""
@@ -137,6 +138,7 @@ def get_pokemon_id():
 
     # Обработать ошибку (покемон не найден)
     return {"error": "Покемон не найден"}, 400
+
 
 @app.route("/api/pokemon/", methods=["GET"])
 def get_pokemon():
@@ -238,10 +240,28 @@ def get_pokemon_fight_stats():
     pkmn_user = update_pokemon_data([pkmn_user], config)
     pkmn_enemy = update_pokemon_data([pkmn_enemy], config)
 
-    return {
-        "pkmn_user": pkmn_user, 
-        "pkmn_enemy": pkmn_enemy
-    }
+    return {"pkmn_user": pkmn_user, "pkmn_enemy": pkmn_enemy}
+
+
+@app.route("/api/fight", methods=["POST"])
+def attack():
+    """Получить атакующего"""
+    # Получить параметры запроса
+    data = request.get_json()
+    user_attack = data.get("user_attack")
+
+    # Обработать ошибки
+    if not user_attack:
+        return {"error": "Не указана атака пользователя"}
+
+    # Решить кто атакует
+    computer_attack = random.randint(0, 10)
+    if int(user_attack) % 2 == computer_attack % 2:
+        # Атакует пользователь
+        return {"isAttackUser": True}
+    else:
+        # Атакует компьютер
+        return {"isAttackUser": False}
 
 
 if __name__ == "__main__":
