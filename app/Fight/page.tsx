@@ -2,7 +2,7 @@
 import Head from "next/head"
 import './page.css'
 import CustomBar from "@/components/Fight/Pokemon_bar"
-import { SetStateAction, use, useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 
 class fightData {
@@ -45,7 +45,6 @@ const FightPage = () => {
     const handleAttack = () => {
         console.log('Attack');
         let isAttackUser = null;
-        // Make request to /api/fight/ [POST] with parameter user_attack(inputValue)
         fetch('/api/fight/', {
             method: 'POST',
             body: JSON.stringify({

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import CustomHP from "./Pokemon_hp_bar";
 
 interface BarProps {
     item: {
@@ -18,7 +18,6 @@ interface BarProps {
 }
 
 const CustomBar: React.FC<BarProps> = ({ item }) => {
-
     return (
         <>
             <div className="name">
@@ -26,7 +25,7 @@ const CustomBar: React.FC<BarProps> = ({ item }) => {
                 <p id="my-pokemon-name">{item.name}</p>
             </div>
             <div className="hp">
-                <div>Current HP:</div><div className="sec-brd"><div id="hp-line-my" className="hp-line"></div></div>
+                <CustomHP maxHP={item.stats.hp} curHP={item.cur_hp}/>
                 <p>
                     <span id="hp-count-my-current">{item.cur_hp}</span>
                     /
