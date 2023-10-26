@@ -243,7 +243,7 @@ def get_pokemon_fight_stats():
     return {"pkmn_user": pkmn_user, "pkmn_enemy": pkmn_enemy}
 
 
-@app.route("/api/fight", methods=["POST"])
+@app.route("/api/fight/", methods=["POST"])
 def attack():
     """Получить атакующего"""
     # Получить параметры запроса

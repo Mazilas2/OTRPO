@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from 'react';
-import './card.css'
+import './Card.css'
 import { getColour, ColourType } from './Colours';
 
 interface CardProps {

@@ -4,28 +4,28 @@
   "private": true,
   "scripts": {
     "flask-dev": "cross-env FLASK_DEBUG=1 pip3 install -r requirements.txt && python3 -m flask --app api/index run -p 5328",
-    "next-dev": "next dev",
+    "next-dev": "next dev --turbo",
     "dev": "concurrently \"pnpm run next-dev\" \"pnpm run flask-dev\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/node": "20.1.4",
-    "@types/react": "18.2.6",
-    "@types/react-dom": "18.2.4",
-    "autoprefixer": "10.4.14",
-    "concurrently": "^8.0.1",
+    "@types/node": "20.8.9",
+    "@types/react": "18.2.33",
+    "@types/react-dom": "18.2.14",
+    "autoprefixer": "10.4.16",
+    "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
-    "eslint": "8.40.0",
-    "eslint-config-next": "13.4.2",
-    "next": "13.4.3",
-    "postcss": "8.4.23",
+    "eslint": "8.52.0",
+    "eslint-config-next": "14.0.0",
+    "next": "14.0.0",
+    "postcss": "8.4.31",
     "react": "18.2.0",
     "react-daisyui": "^4.1.2",
     "react-dom": "18.2.0",
-    "tailwindcss": "3.3.2",
-    "typescript": "5.0.4"
+    "tailwindcss": "3.3.5",
+    "typescript": "5.2.2"
   },
   "devDependencies": {
     "daisyui": "^3.9.3"
