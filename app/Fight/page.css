@@ -101,6 +101,7 @@ html {
     margin-bottom: 10px;
     gap: 10px;
     box-shadow: 10px 10px 2px 0 rgba(0, 0, 0, 0.8);
+    align-items: center;
 }
 
 .content .Bar .name {
@@ -109,6 +110,13 @@ html {
     height: 35%;
     background: #cad2c5;
     overflow: hidden;
+}
+
+.content .Bar .name p {
+    /* Align text to center vertically */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .content .Bar .hp {

@@ -119,6 +119,7 @@ const CustomCard: React.FC<CardProps> = ({ item, selectedPokemon, setSelectedPok
                     <img className="selected-pkmn-img" src={`https://img.pokemondb.net/sprites/sword-shield/icon/${selectedPokemon}.png`} />
                 </p>
                 <button className="btn" onClick={() => {
+                    console.log('Selected:', item.name);
                     setSelectedPokemon(item.name);
                 }}>
                     Выбрать

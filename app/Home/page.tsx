@@ -45,9 +45,13 @@ const Home: React.FC = () => {
   useEffect(() => {
     const selectedPokemon = localStorage.getItem('selectedPokemon');
     if (selectedPokemon) {
-      setSelectedPokemon(JSON.parse(selectedPokemon));
+      setSelectedPokemon(selectedPokemon);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('selectedPokemon', selectedPokemon);
+  }, [selectedPokemon]);
 
   useEffect(() => {
     const fetchData = async () => {

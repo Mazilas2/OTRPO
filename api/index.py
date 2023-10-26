@@ -3,8 +3,10 @@ import json
 import random
 from flask import Flask, request
 import requests
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 ITEMS_PER_PAGE = 20
 
 
@@ -112,6 +114,29 @@ def get_pokemon_list():
         "search_query": search_query,
     }
 
+@app.route("/api/pokemon/getId", methods=["GET"])
+def get_pokemon_id():
+    """Получить id покемона по имени"""
+    # Получить параметры запроса
+    name = request.args.get("name", type=str)
+
+    # Обработать ошибки
+    if not name:
+        return {"error": "Не указано имя"}, 400
+
+    # Получить данные
+    config = get_config()
+    if check_update(config):
+        update_data(config)
+
+    # Получить данные по покемону
+    data = config["data"]
+    for pkmn in data:
+        if pkmn["name"] == name:
+            return {"id": pkmn["index"]}
+
+    # Обработать ошибку (покемон не найден)
+    return {"error": "Покемон не найден"}, 400
 
 @app.route("/api/pokemon/", methods=["GET"])
 def get_pokemon():
@@ -133,15 +158,16 @@ def get_pokemon():
     # Обработать ошибку (id больше количества покемонов)
     if id > config["count"]:
         return {"error": "Покемона с таким id не существует"}, 400
-    
+
     # Получить данные по покемону
     data = config["data"][id - 1]
-    
+
     # Обновить данные по покемону (stats, types)
     data = update_pokemon_data([data], config)
 
     # Вернуть результат
     return data
+
 
 @app.route("/api/pokemon/random", methods=["GET"])
 def get_pokemon_rnd():
@@ -153,12 +179,13 @@ def get_pokemon_rnd():
 
     # Получить данные по случайному покемону
     data = config["data"][random.randint(0, config["count"] - 1)]
-    
+
     # Обновить данные по покемону (stats, types)
     data = update_pokemon_data([data], config)
 
     # Вернуть результат
     return data
+
 
 @app.route("/api/pokemon/image", methods=["GET"])
 def get_pokemon_image():
@@ -169,7 +196,7 @@ def get_pokemon_image():
     # Обработать ошибки
     if not name:
         return {"error": "Не указано имя"}, 400
-    
+
     # Получить данные
     config = get_config()
     if check_update(config):
@@ -180,9 +207,41 @@ def get_pokemon_image():
     for pkmn in data:
         if pkmn["name"] == name:
             return {"img_url": pkmn["img_url"]}
-        
+
     # Обработать ошибку (покемон не найден)
     return {"error": "Покемон не найден"}, 400
+
+
+@app.route("/api/fight", methods=["GET"])
+def get_pokemon_fight_stats():
+    """Получить информацию о покемонах пользователя и противника"""
+    # Получить параметры запроса
+    id_pokemon_user = request.args.get("id_pokemon_user", type=int)
+    id_pokemon_enemy = request.args.get("id_pokemon_enemy", type=int)
+
+    # Обработать ошибки
+    if not id_pokemon_user:
+        return {"error": "Не указан id покемона пользователя"}
+    if not id_pokemon_enemy:
+        return {"error": "Не указан id покемона противника"}
+
+    # Получить данные
+    config = get_config()
+    if check_update(config):
+        update_data(config)
+
+    # Получить информацию о покемоне
+    pkmn_user = config["data"][id_pokemon_user]
+    pkmn_enemy = config["data"][id_pokemon_enemy]
+
+    # Обновить данные по покемону (stats, types)
+    pkmn_user = update_pokemon_data([pkmn_user], config)
+    pkmn_enemy = update_pokemon_data([pkmn_enemy], config)
+
+    return {
+        "pkmn_user": pkmn_user, 
+        "pkmn_enemy": pkmn_enemy
+    }
 
 
 if __name__ == "__main__":
