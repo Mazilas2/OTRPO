@@ -4,18 +4,46 @@ import random
 import collections
 
 collections.Iterable = collections.abc.Iterable
-from flask import Flask, request
+from flask import Flask, jsonify, request
 import requests
 from flask_cors import CORS
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import Column, Integer, String, inspect, DateTime
+
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 app = Flask(__name__)
 CORS(
     app,
-    origins=["http://127.0.0.1:3001"],
+    origins="*",
     supports_credentials=True,
     allow_headers=["Content-Type"],
 )
 ITEMS_PER_PAGE = 20
+DATABASE_PATH = "sqlite:///pokemons.db"
+engine = create_engine(DATABASE_PATH, echo=True)
+Session = sessionmaker(bind=engine)
+
+
+class Base(DeclarativeBase):
+    """Базовый класс для работы с таблицами"""
+
+    pass
+
+
+class Results(Base):
+    """Класс для работы с таблицей результатов"""
+
+    __tablename__ = "results"
+    id = Column(Integer, primary_key=True)
+    user_pkmn = Column(String)
+    enemy_pkmn = Column(String)
+    winner = Column(String)
+    time = Column(DateTime, default=datetime.datetime.utcnow)
 
 
 def get_data(url):
@@ -85,6 +113,24 @@ def update_pokemon_data(data, config):
                 pkmn["types"].append(pkmn_type["type"]["name"])
             save_config(config)
     return data
+
+
+def saveToSql(user_pkmn, enemy_pkmn, winner):
+    try:
+        # Create a new Results instance
+        with Session(autoflush=False, bind=engine) as db:
+            result = Results(user_pkmn=user_pkmn, enemy_pkmn=enemy_pkmn, winner=winner)
+
+            # Add the instance to the session
+            db.add(result)
+
+            # Commit the transaction to save the data to the database
+            db.commit()
+
+            return "Data saved successfully."
+
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 
 @app.route("/api/pokemon/list", methods=["GET"])
@@ -270,6 +316,81 @@ def attack():
     else:
         # Атакует компьютер
         return {"isAttackUser": False}
+
+
+@app.route("/api/fight/fast", methods=["GET"])
+def fast_fight():
+    user_pokemon_hp = int(request.args.get("usr_hp"))
+    enemy_pokemon_hp = int(request.args.get("enm_hp"))
+    while user_pokemon_hp > 0 and enemy_pokemon_hp > 0:
+        user_pokemon_damage = int(request.args.get("usr_dmg"))
+        user_pokemon_damage = int(request.args.get("enm_dmg"))
+
+        user_attack = random.randint(0, 10)
+        computer_attack = random.randint(0, 10)
+
+        if int(user_attack) % 2 == computer_attack % 2:
+            # Атакует пользователь
+            enemy_pokemon_hp -= user_pokemon_damage
+        else:
+            # Атакует компьютер
+            user_pokemon_hp -= user_pokemon_damage
+
+    if user_pokemon_hp <= 0:
+        return jsonify({"Winner": "Enemy"})
+    if enemy_pokemon_hp <= 0:
+        return jsonify({"Winner": "User"})
+
+
+@app.route("/api/fight/save_result", methods=["POST"])
+def save_fight_result():
+    # Get the JSON data from the request
+    data = request.get_json()
+
+    # Extract the relevant information from the JSON data
+    user_pkmn = data.get("user_pkmn")
+    enemy_pkmn = data.get("enemy_pkmn")
+    winner = data.get("winner")
+
+    # Check if the required data is provided
+    if user_pkmn is None or enemy_pkmn is None or winner is None:
+        return jsonify({"error": "Missing data in the request"}), 400
+
+    # Save the fight result to the database
+    result = saveToSql(user_pkmn, enemy_pkmn, winner)
+
+    return jsonify({"message": result})
+
+
+@app.route("/api/send_fast_fight_result", methods=["POST"])
+def send_fast_fight_result():
+    # Get the email address from the request body
+    data = request.get_json()
+    email_receiver = data.get("email")
+    winner = data.get("winner")
+
+    if not email_receiver:
+        return jsonify({"error": "Email is required"}), 400
+
+    sender_email = "" # Set there email
+    sender_password = "xwvs pfis gizf hzec"
+
+    subject = "Fast Fight Results"
+    body = f"Winner: {winner}"
+
+    em = EmailMessage()
+    em["From"] = sender_email
+    em["To"] = email_receiver
+    em["Subject"] = subject
+    em.set_content(body)
+
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+        smtp.login(sender_email, sender_password)
+        smtp.sendmail(sender_email, email_receiver, em.as_string())
+
+    return jsonify({"message": body})
 
 
 if __name__ == "__main__":
