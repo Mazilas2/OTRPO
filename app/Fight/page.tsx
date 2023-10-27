@@ -227,6 +227,7 @@ const FightPage = () => {
 		}
 	};
 
+
 	useEffect(() => {
 		if (isInitialized == false) {
 			setInitialized(true);

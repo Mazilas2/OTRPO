@@ -1,4 +1,5 @@
 import datetime
+from io import BytesIO
 import json
 import random
 import collections
@@ -16,6 +17,8 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 
+from ftplib import FTP
+
 app = Flask(__name__)
 CORS(
     app,
@@ -24,6 +27,7 @@ CORS(
     allow_headers=["Content-Type"],
 )
 ITEMS_PER_PAGE = 20
+
 DATABASE_PATH = "sqlite:///pokemons.db"
 engine = create_engine(DATABASE_PATH, echo=True)
 Session = sessionmaker(bind=engine)
@@ -372,7 +376,7 @@ def send_fast_fight_result():
     if not email_receiver:
         return jsonify({"error": "Email is required"}), 400
 
-    sender_email = "" # Set there email
+    sender_email = ""  # Set there email
     sender_password = "xwvs pfis gizf hzec"
 
     subject = "Fast Fight Results"
@@ -386,11 +390,76 @@ def send_fast_fight_result():
 
     context = ssl.create_default_context()
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as smtp:
         smtp.login(sender_email, sender_password)
         smtp.sendmail(sender_email, email_receiver, em.as_string())
 
     return jsonify({"message": body})
+
+
+def get_ftp_file_list():
+    # Укажите данные для подключения к вашему FTP-серверу
+    ftp = FTP("ftp.byethost5.com")
+    ftp.login(
+        user="b5_35318338",
+        passwd="qweasdzxc",
+    )
+
+    ftp.cwd("htdocs")
+
+    # Получите список файлов
+    files = ftp.nlst()
+
+    # Закройте соединение с FTP
+    ftp.quit()
+
+    return files
+
+
+def create_Markdown(data):
+    markdown_text = f"**Name:** {data['name']}\n"
+    markdown_text += f"![Image]({data['img_url']})\n"
+    markdown_text += f"**Types:** {', '.join(data['types'])}\n"
+    markdown_text += "**Stats:**\n"
+    for stat, value in data["stats"].items():
+        markdown_text += f"- **{stat.capitalize()}:** {value}\n"
+    return markdown_text
+
+
+def send_ftp(file_list, data):
+    current_datetime = datetime.datetime.now()
+    folder_name = current_datetime.strftime("%Y%m%d")
+    ftp = FTP("ftp.byethost5.com")
+    ftp.login(
+        user="b5_35318338",
+        passwd="qweasdzxc",
+    )
+    if folder_name in file_list:
+        ftp.cwd("htdocs")
+        ftp.cwd(folder_name)
+    else:
+        ftp.cwd("htdocs")
+        ftp.mkd(folder_name)
+        ftp.cwd(folder_name)
+    markdown = create_Markdown(data)
+    buffer = BytesIO(markdown.encode("utf-8"))
+    ftp.storbinary(f"STOR {data['name']}.md", buffer)
+    ftp.quit()
+    return jsonify({"message": "OK"})
+
+
+@app.route("/api/getFtpFiles", methods=["GET"])
+def get_ftp_files():
+    file_list = get_ftp_file_list()
+    return jsonify({"files": file_list})
+
+
+@app.route("/api/sendFtpFile", methods=["POST"])
+def send_ftp_files():
+    data = request.get_json()
+    dataPokemon = data.get("Pokemon")
+    file_list = get_ftp_file_list()
+    return send_ftp(file_list, dataPokemon)
 
 
 if __name__ == "__main__":
