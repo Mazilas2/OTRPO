@@ -1,12 +1,20 @@
 import datetime
 import json
 import random
+import collections
+
+collections.Iterable = collections.abc.Iterable
 from flask import Flask, request
 import requests
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    origins=["http://127.0.0.1:3001"],
+    supports_credentials=True,
+    allow_headers=["Content-Type"],
+)
 ITEMS_PER_PAGE = 20
 
 
