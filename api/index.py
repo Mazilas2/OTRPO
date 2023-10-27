@@ -9,7 +9,7 @@ from flask import Flask, jsonify, request
 import requests
 from flask_cors import CORS
 
-from sqlalchemy import create_engine
+from sqlalchemy import Float, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy import Column, Integer, String, inspect, DateTime
 
@@ -47,6 +47,16 @@ class Results(Base):
     user_pkmn = Column(String)
     enemy_pkmn = Column(String)
     winner = Column(String)
+    time = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class PokemonRatings(Base):
+    """Класс для работы с таблицей рейтингов покемонов"""
+
+    __tablename__ = "pokemon_ratings"
+    id = Column(Integer, primary_key=True)
+    pokemon_name = Column(String)
+    rating = Column(Float)
     time = Column(DateTime, default=datetime.datetime.utcnow)
 
 
@@ -460,6 +470,44 @@ def send_ftp_files():
     dataPokemon = data.get("Pokemon")
     file_list = get_ftp_file_list()
     return send_ftp(file_list, dataPokemon)
+
+
+@app.route("/api/get_ratings", methods=["GET"])
+def get_ratings():
+    from create_db import PokemonRatings
+
+    # Get the name of the Pokémon from the query parameter
+    pokemon_name = request.args.get("name")
+
+    if not pokemon_name:
+        return jsonify({"error": "Pokemon name is required"}), 400
+
+    # Query the database to get ratings for the specified Pokémon
+    with Session(autoflush=False, bind=engine) as db:
+        ratings = db.query(PokemonRatings).filter_by(pokemon_name=pokemon_name).all()
+
+        # Extract only the rating values into a list
+        rating_list = [rating.rating for rating in ratings]
+
+    return jsonify({"ratings": rating_list})
+
+
+@app.route("/api/sendReview", methods=["POST"])
+def send_review():
+    data = request.get_json()
+    # Extract the review data from the request JSON
+    rating = data.get("rating")
+    pokemon_name = data.get("pokemon")
+
+    with Session(autoflush=False, bind=engine) as db:
+        pokemon_rating = PokemonRatings(
+            pokemon_name=pokemon_name, rating=rating, time=datetime.datetime.now()
+        )
+
+        db.add(pokemon_rating)
+        db.commit()
+
+    return jsonify({"Message": "OK"})
 
 
 if __name__ == "__main__":

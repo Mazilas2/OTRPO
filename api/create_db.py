@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from sqlalchemy import DateTime, create_engine
+from sqlalchemy import DateTime, Float, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy import Column, Integer, String, inspect
 
@@ -24,6 +24,16 @@ class Results(Base):
     user_pkmn = Column(String)
     enemy_pkmn = Column(String)
     winner = Column(String)
+    time = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class PokemonRatings(Base):
+    """Класс для работы с таблицей рейтингов покемонов"""
+
+    __tablename__ = "pokemon_ratings"
+    id = Column(Integer, primary_key=True)
+    pokemon_name = Column(String)
+    rating = Column(Float)
     time = Column(DateTime, default=datetime.datetime.utcnow)
 
 

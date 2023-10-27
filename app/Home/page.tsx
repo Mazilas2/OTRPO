@@ -117,7 +117,7 @@ const Home: React.FC = () => {
           ) : (
             pokemonData.map((pokemon: cardData) => {
               return (
-                <Card item={pokemon} selectedPokemon={selectedPokemon} setSelectedPokemon={setSelectedPokemon} />
+                <Card item={pokemon} selectedPokemon={selectedPokemon} setSelectedPokemon={setSelectedPokemon} key={pokemon.name}/>
               )
             })
           )}

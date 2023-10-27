@@ -4,6 +4,7 @@ import "./Card.css";
 import { getColour, ColourType } from "./Colours";
 
 import Image from "next/image";
+import { Form } from "react-daisyui";
 
 interface CardProps {
 	item: {
@@ -79,10 +80,21 @@ const CustomCard: React.FC<CardProps> = ({
 	setSelectedPokemon,
 }) => {
 	const [pokemonRating, setPokemonRating] = useState<number[]>([]);
+  const [selectedRating, setSelectedRating] = useState(0);
 
-  useEffect(() => {
-    
-  }, [])
+	useEffect(() => {
+		fetch(`/api/get_ratings?name=${item.name}`)
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.ratings) {
+					setPokemonRating([...pokemonRating, ...data.ratings]);
+					console.log(pokemonRating);
+				}
+			})
+			.catch((error) => {
+				console.error("Error fetching ratings:", error);
+			});
+	}, []);
 
 	const handleSendToFtp = () => {
 		const dataToSend = {
@@ -105,8 +117,47 @@ const CustomCard: React.FC<CardProps> = ({
 			});
 	};
 
+  const handleRatingChange = (index:number) => {
+		const newRating = index+1;
+		setSelectedRating(newRating);
+    console.log(newRating);
+  };
+
+  const handleSubmit = () => {
+		// Here, you can send a POST request with selectedRating and pokemonName
+    console.log(selectedRating)
+		fetch("/api/sendReview", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				rating: selectedRating,
+				pokemon: item.name,
+			}),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log("POST request response", data);
+			})
+			.catch((error) => {
+				console.error("Error sending POST request", error);
+			});
+  };
+
+
+  
+
+  const calculateAverageRating = (pokemonRating: number[]) => {
+		// Calculate the average rating using Math
+		const sum = pokemonRating.reduce((total, rating) => total + rating, 0);
+		return Math.round(sum / pokemonRating.length);
+  };
+
+  const averageRating = calculateAverageRating(pokemonRating);
+
 	return (
-		<div className="content-cards">
+		<div className="content-cards" key={item.name}>
 			<div className="card">
 				<div className="card-header white">
 					<div className="black-circle">
@@ -211,6 +262,26 @@ const CustomCard: React.FC<CardProps> = ({
 						<p>
 							<b>Rating:</b> {}
 						</p>
+						<Form className="rating flex flex-row">
+							{Array.from({ length: 5 }).map((_, index) => (
+								<input
+									type="radio"
+									name="rating-1"
+									className={`mask mask-star-2 ${
+										index < averageRating
+											? "bg-orange-400"
+											: "bg-gray-300"
+									}`}
+									onChange={() => handleRatingChange(index)}
+									key={index}
+								/>
+							))}
+						</Form>
+						<div>
+							<button onClick={handleSubmit}>
+								Submit Rating
+							</button>
+						</div>
 						<button onClick={handleSendToFtp}>Send to FTP</button>
 					</div>
 				</div>
