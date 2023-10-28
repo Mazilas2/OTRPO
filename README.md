@@ -20,6 +20,28 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Additionally, you need to create a .env file in the root folder:
+```env
+REDIS_HOST="..."
+REDIS_PASSWORD="..."
+REDIS_PORT="..."
 
-The Flask server will be running on [http://127.0.0.1:5328](http://127.0.0.1:5328) – feel free to change the port in `package.json` (you'll also need to update it in `next.config.js`).
+SENDER_EMAIL="..."
+SENDER_PASSWORD="..."
+
+FTP_USER="..."
+FTP_PASSWORD="..."
+FTP_HOST="..."
+
+REDIS_URL="..."
+REDIS_TOKEN="..."
+```
+
+To re-create db file:
+## 1 Step
+Delete old pokemons.db file
+## 2 Step 
+Run create_db
+```bash
+python ./api/create_db.py
+```
