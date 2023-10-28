@@ -3,11 +3,16 @@ from io import BytesIO
 import json
 import random
 import collections
+import os
 
 collections.Iterable = collections.abc.Iterable
 from flask import Flask, jsonify, request
 import requests
 from flask_cors import CORS
+
+import logging
+
+logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
 
 from sqlalchemy import Float, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -18,6 +23,10 @@ import ssl
 from email.message import EmailMessage
 
 from ftplib import FTP
+
+from dotenv import load_dotenv
+
+from upstash_redis import Redis
 
 app = Flask(__name__)
 CORS(
@@ -31,6 +40,8 @@ ITEMS_PER_PAGE = 20
 DATABASE_PATH = "sqlite:///pokemons.db"
 engine = create_engine(DATABASE_PATH, echo=True)
 Session = sessionmaker(bind=engine)
+
+load_dotenv()
 
 
 class Base(DeclarativeBase):
@@ -130,15 +141,11 @@ def update_pokemon_data(data, config):
 
 
 def saveToSql(user_pkmn, enemy_pkmn, winner):
+    """Сохранить результаты боя в базу данных"""
     try:
-        # Create a new Results instance
         with Session(autoflush=False, bind=engine) as db:
             result = Results(user_pkmn=user_pkmn, enemy_pkmn=enemy_pkmn, winner=winner)
-
-            # Add the instance to the session
             db.add(result)
-
-            # Commit the transaction to save the data to the database
             db.commit()
 
             return "Data saved successfully."
@@ -149,9 +156,29 @@ def saveToSql(user_pkmn, enemy_pkmn, winner):
 
 @app.route("/api/pokemon/list", methods=["GET"])
 def get_pokemon_list():
+    """Получить список покемонов"""
     # Получить параметры запроса
     search_query = request.args.get("filters", default="", type=str)
     page = request.args.get("page", default=1, type=int)
+
+    # Check in redis if the data is cached
+    redis = Redis(url=os.environ.get("REDIS_URL"), token=os.environ.get("REDIS_TOKEN"))
+
+    key = f"pokemon_list_{search_query}_{page}"
+    key_validate = f"last_cache_validation_key_{search_query}_{page}"
+    cached_data = redis.get(key)
+
+    if cached_data:
+        # Check when the data was cached
+        last_validation_time = redis.get(key_validate)
+        # Check if hour passes since the last cache
+        if (
+            datetime.datetime.now()
+            - datetime.datetime.fromisoformat(last_validation_time)
+        ) < datetime.timedelta(hours=1):
+            print("DATA FOUND IN CACHE", key)
+            print("TIME SINCE LAST CACHE", datetime.datetime.now() - datetime.datetime.fromisoformat(last_validation_time))
+            return cached_data
 
     # Получить данные
     config = get_config()
@@ -173,14 +200,20 @@ def get_pokemon_list():
     # Обновить данные по покемонам (stats, types)
     data = update_pokemon_data(data, config)
 
-    # Вернуть результат
-    return {
+    res = {
         "count": count,
         "num_pages": num_pages,
         "data": data,
         "page": page,
         "search_query": search_query,
     }
+
+    # Cache the data in redis
+    redis.set(key, res)
+    redis.set(key_validate, datetime.datetime.now().isoformat())
+
+    # Вернуть результат
+    return jsonify(res)
 
 
 @app.route("/api/pokemon/getId", methods=["GET"])
@@ -334,6 +367,7 @@ def attack():
 
 @app.route("/api/fight/fast", methods=["GET"])
 def fast_fight():
+    """Быстрый бой"""
     user_pokemon_hp = int(request.args.get("usr_hp"))
     enemy_pokemon_hp = int(request.args.get("enm_hp"))
     while user_pokemon_hp > 0 and enemy_pokemon_hp > 0:
@@ -358,6 +392,7 @@ def fast_fight():
 
 @app.route("/api/fight/save_result", methods=["POST"])
 def save_fight_result():
+    """Сохранить результаты боя"""
     # Get the JSON data from the request
     data = request.get_json()
 
@@ -378,6 +413,7 @@ def save_fight_result():
 
 @app.route("/api/send_fast_fight_result", methods=["POST"])
 def send_fast_fight_result():
+    """Отправить результаты боя на почту"""
     # Get the email address from the request body
     data = request.get_json()
     email_receiver = data.get("email")
@@ -386,8 +422,8 @@ def send_fast_fight_result():
     if not email_receiver:
         return jsonify({"error": "Email is required"}), 400
 
-    sender_email = ""  # Set there email
-    sender_password = "xwvs pfis gizf hzec"
+    sender_email = os.environ.get("SENDER_EMAIL")
+    sender_password = os.environ.get("SENDER_PASSWORD")
 
     subject = "Fast Fight Results"
     body = f"Winner: {winner}"
@@ -407,13 +443,19 @@ def send_fast_fight_result():
     return jsonify({"message": body})
 
 
-def get_ftp_file_list():
-    # Укажите данные для подключения к вашему FTP-серверу
-    ftp = FTP("ftp.byethost5.com")
+def login_FTP():
+    ftp = FTP(os.environ.get("FTP_HOST"))
     ftp.login(
-        user="b5_35318338",
-        passwd="qweasdzxc",
+        user=os.environ.get("FTP_USER"),
+        passwd=os.environ.get("FTP_PASSWORD"),
     )
+    return ftp
+
+
+def get_ftp_file_list():
+    """Получить список файлов на FTP-сервере"""
+    # Укажите данные для подключения к вашему FTP-серверу
+    ftp = login_FTP()
 
     ftp.cwd("htdocs")
 
@@ -427,6 +469,7 @@ def get_ftp_file_list():
 
 
 def create_Markdown(data):
+    """Создать Markdown-текст для покемона"""
     markdown_text = f"**Name:** {data['name']}\n"
     markdown_text += f"![Image]({data['img_url']})\n"
     markdown_text += f"**Types:** {', '.join(data['types'])}\n"
@@ -437,13 +480,12 @@ def create_Markdown(data):
 
 
 def send_ftp(file_list, data):
+    """Отправить Markdown-файл на FTP-сервер"""
     current_datetime = datetime.datetime.now()
     folder_name = current_datetime.strftime("%Y%m%d")
-    ftp = FTP("ftp.byethost5.com")
-    ftp.login(
-        user="b5_35318338",
-        passwd="qweasdzxc",
-    )
+
+    ftp = login_FTP()
+
     if folder_name in file_list:
         ftp.cwd("htdocs")
         ftp.cwd(folder_name)
@@ -460,12 +502,14 @@ def send_ftp(file_list, data):
 
 @app.route("/api/getFtpFiles", methods=["GET"])
 def get_ftp_files():
+    """Получить список файлов на FTP-сервере"""
     file_list = get_ftp_file_list()
     return jsonify({"files": file_list})
 
 
 @app.route("/api/sendFtpFile", methods=["POST"])
 def send_ftp_files():
+    """Отправить Markdown-файл на FTP-сервер"""
     data = request.get_json()
     dataPokemon = data.get("Pokemon")
     file_list = get_ftp_file_list()
@@ -474,6 +518,7 @@ def send_ftp_files():
 
 @app.route("/api/get_ratings", methods=["GET"])
 def get_ratings():
+    """Получить рейтинги покемонов"""
     from create_db import PokemonRatings
 
     # Get the name of the Pokémon from the query parameter
@@ -489,11 +534,12 @@ def get_ratings():
         # Extract only the rating values into a list
         rating_list = [rating.rating for rating in ratings]
 
-    return jsonify({"ratings": rating_list})
+        return jsonify({"ratings": rating_list})
 
 
 @app.route("/api/sendReview", methods=["POST"])
 def send_review():
+    """Отправить рейтинг покемона"""
     data = request.get_json()
     # Extract the review data from the request JSON
     rating = data.get("rating")
