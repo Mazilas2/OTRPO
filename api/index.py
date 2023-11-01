@@ -4,6 +4,7 @@ import json
 import random
 import collections
 import os
+import time
 
 collections.Iterable = collections.abc.Iterable
 from flask import Flask, jsonify, request
@@ -177,7 +178,11 @@ def get_pokemon_list():
             - datetime.datetime.fromisoformat(last_validation_time)
         ) < datetime.timedelta(hours=1):
             print("DATA FOUND IN CACHE", key)
-            print("TIME SINCE LAST CACHE", datetime.datetime.now() - datetime.datetime.fromisoformat(last_validation_time))
+            print(
+                "TIME SINCE LAST CACHE",
+                datetime.datetime.now()
+                - datetime.datetime.fromisoformat(last_validation_time),
+            )
             return cached_data
 
     # Получить данные

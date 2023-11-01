@@ -3,7 +3,7 @@ import Head from "next/head";
 import "./page.css";
 import CustomBar from "@/components/Fight/Pokemon_bar";
 import { SetStateAction, useEffect, useState } from "react";
-import { error } from "console";
+import CustomFightMenu from "@/components/Fight/Fight_menu";
 
 class fightData {
 	name: string;
@@ -122,7 +122,7 @@ const FightPage = () => {
 	};
 
 	const sendEmail = (winner: string) => {
-		console.log("CUR_WINNER",winner)
+		console.log("CUR_WINNER", winner);
 		fetch("/api/send_fast_fight_result", {
 			method: "POST",
 			body: JSON.stringify({
@@ -134,7 +134,7 @@ const FightPage = () => {
 			},
 		})
 			.then((response) => {
-				console.log("DONE",response);
+				console.log("DONE", response);
 				return response.json();
 			})
 			.then((data) => {
@@ -161,7 +161,7 @@ const FightPage = () => {
 			.then((data) => {
 				// Handle the fast fight result, e.g., update UI with the winner
 				console.log(data); // You can update the UI with the result
-				sendEmail(data.Winner)
+				sendEmail(data.Winner);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -226,7 +226,6 @@ const FightPage = () => {
 				  );
 		}
 	};
-
 
 	useEffect(() => {
 		if (isInitialized == false) {
@@ -340,38 +339,13 @@ const FightPage = () => {
 					</div>
 				</div>
 				{/*  */}
-				<div className="fight">
-					<input
-						type="text"
-						id="fight-input"
-						placeholder="Enter your move here"
-						value={inputValue}
-						onChange={handleInputChange}
-					/>
-					<div className="fight-btn">
-						<button
-							className="btn-attack"
-							id="fight-btn"
-							onClick={handleAttack}
-						>
-							FIGHT
-						</button>
-
-						<button
-							className="btn-attack"
-							id="fast-fight-btn"
-							onClick={handleFastFight}
-						>
-							FAST FIGHT
-						</button>
-					</div>
-					<textarea
-						className="fight-log"
-						readOnly
-						id="fight-log"
-						value={logList.join("\n")}
-					/>
-				</div>
+				<CustomFightMenu
+					inputValue={inputValue}
+					handleInputChange={handleInputChange}
+					handleAttack={handleAttack}
+					handleFastFight={handleFastFight}
+					logList={logList}
+				/>
 				{/* Put pokemon bar here */}
 				<div className="my-pokemon">
 					<div className="Bar">
@@ -390,7 +364,7 @@ const FightPage = () => {
 				</div>
 				{/*  */}
 			</div>
-			<footer className="footer footer-center p-4 bg-base-300 text-base-content">
+			<footer className="p-4 footer footer-center bg-base-300 text-base-content">
 				<aside>
 					<p>Выполнил: Друганов А.В.</p>
 				</aside>
