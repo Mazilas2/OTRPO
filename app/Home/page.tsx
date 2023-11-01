@@ -5,6 +5,7 @@ import Card from "@/components/Home/Card/Card";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import Pagination from "@/components/Home/Pagination";
+import axios from "axios";
 
 class cardData {
 	name: string;
@@ -70,11 +71,11 @@ const Home: React.FC = () => {
 			setIsLoading(true);
 
 			try {
-				const response = await fetch(
+				const response = await axios.get(
 					`/api/pokemon/list?page=${page}&filters=${searchQuery}`
 				);
-				if (response.ok) {
-					const data = await response.json();
+				if (response.status === 200) {
+					const data = await response.data;
 					console.log("Data fetched:", data);
 					setPokemonData(data.data);
 					setTotalPages(data.num_pages);

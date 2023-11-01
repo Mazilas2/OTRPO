@@ -4,6 +4,7 @@ import "./page.css";
 import CustomBar from "@/components/Fight/Pokemon_bar";
 import { SetStateAction, useEffect, useState } from "react";
 import CustomFightMenu from "@/components/Fight/Fight_menu";
+import axios from "axios";
 
 class fightData {
 	name: string;
@@ -89,71 +90,56 @@ const FightPage = () => {
 		setInputValue(event.target.value);
 	};
 
-	const saveFightResult = (
-		user_pkmn: string,
-		enemy_pkmn: string,
+	const saveFightResult = async (
+		userPkmn: string,
+		enemyPkmn: string,
 		winner: string
 	) => {
-		fetch("/api/fight/save_result", {
-			method: "POST",
-			body: JSON.stringify({
-				user_pkmn: user_pkmn,
-				enemy_pkmn: enemy_pkmn,
+		try {
+			const response = await axios.post("/api/fight/save_result", {
+				user_pkmn: userPkmn,
+				enemy_pkmn: enemyPkmn,
 				winner: winner,
-			}),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((response) => {
-				console.log(response);
-				if (response.ok) {
-					return response.json();
-				} else {
-					throw new Error("Failed to save fight result");
-				}
-			})
-			.then((data) => {
-				console.log(data.message); // Success message from the server
-			})
-			.catch((error) => {
-				console.error(error.message);
 			});
+			if (response.status === 200) {
+				return response.data;
+			} else {
+				throw new Error("Failed to save fight result");
+			}
+		} catch (error) {
+			console.error((error as Error).message);
+		}
 	};
 
-	const sendEmail = (winner: string) => {
-		console.log("CUR_WINNER", winner);
-		fetch("/api/send_fast_fight_result", {
-			method: "POST",
-			body: JSON.stringify({
-				winner: winner,
-				email: inputValue,
-			}),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((response) => {
-				console.log("DONE", response);
-				return response.json();
-			})
-			.then((data) => {
-				console.log(data);
-			})
-			.catch((error) => {
-				console.log(error);
-			});
+	const sendEmail = async (winner: string) => {
+		try {
+			const response = await axios.post(
+				"/api/send_fast_fight_result",
+				{
+					winner,
+					email: inputValue,
+				},
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+				}
+			);
+			console.log("DONE", response);
+			return response.data;
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
 	const handleFastFight = () => {
 		console.log("Fast Fight");
 		const url = `/api/fight/fast?usr_hp=${pokemonDataUser.stats.hp}&enm_hp=${pokemonDataEnemy.stats.hp}&usr_dmg=${pokemonDataUser.stats.attack}&enm_dmg=${pokemonDataEnemy.stats.attack}`;
-		fetch(url, {
-			method: "GET",
-		})
+		axios
+			.get(url)
 			.then((response) => {
-				if (response.ok) {
-					return response.json();
+				if (response.status === 200) {
+					return response.data;
 				} else {
 					throw new Error("Fast fight request failed");
 				}
@@ -171,19 +157,15 @@ const FightPage = () => {
 	const handleAttack = () => {
 		console.log("Attack");
 		let isAttackUser = null;
-		fetch("/api/fight/", {
-			method: "POST",
-			body: JSON.stringify({
+
+		axios
+			.post("/api/fight/", {
 				user_attack: inputValue,
-			}),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((Response) => Response.json())
-			.then((data) => {
-				console.log(data);
-				isAttackUser = data.isAttackUser;
+			})
+			.then((response) => {
+				console.log(response.data);
+				isAttackUser = response.data.isAttackUser;
+
 				if (isAttackUser) {
 					const updatedPokemonDataEnemy = {
 						...pokemonDataEnemy,
@@ -207,11 +189,16 @@ const FightPage = () => {
 					setPokemonDataUser(updatedPokemonDataUser);
 					console.log(updatedPokemonDataUser);
 				}
+
 				const log = isAttackUser
 					? `${pokemonDataUser.name} attacked ${pokemonDataEnemy.name} with ${inputValue} and dealt ${pokemonDataUser.stats.attack} damage!`
 					: `${pokemonDataEnemy.name} attacked ${pokemonDataUser.name} with ${inputValue} and dealt ${pokemonDataEnemy.stats.attack} damage!`;
 				setLogList([...logList, log]);
+			})
+			.catch((error) => {
+				console.error(error);
 			});
+
 		if (pokemonDataUser.cur_hp <= 0 || pokemonDataEnemy.cur_hp <= 0) {
 			isAttackUser
 				? saveFightResult(
@@ -241,9 +228,9 @@ const FightPage = () => {
 			}
 			const fetchDataEnemy = async () => {
 				try {
-					const response = await fetch(`/api/pokemon/random`);
-					if (response.ok) {
-						const data = await response.json();
+					const response = await axios.get("/api/pokemon/random");
+					if (response.status === 200) {
+						const data = response.data;
 						console.log("Data fetched Enemy:", data[0]);
 						const hp = data[0].stats.hp;
 						console.log(hp);
@@ -269,11 +256,11 @@ const FightPage = () => {
 			const fetchDataUserId = async () => {
 				try {
 					const url = `/api/pokemon/getId?name=${pokemonNameUser}`;
-					const response = await fetch(url, {
+					const response = await axios.get(url, {
 						method: "GET",
 					});
-					if (response.ok) {
-						const data = await response.json();
+					if (response.status === 200) {
+						const data = await response.data;
 						console.log("Data fetched User:", data.id);
 						setPokemonIdUser(data.id);
 					}
@@ -289,11 +276,9 @@ const FightPage = () => {
 		const fetchDataUser = async () => {
 			try {
 				const url = `/api/pokemon/?id=${pokemonIdUser}`;
-				const response = await fetch(url, {
-					method: "GET",
-				});
-				if (response.ok) {
-					const data = await response.json();
+				const response = await axios.get(url);
+				if (response.status === 200) {
+					const data = response.data;
 					const hp = data[0].stats.hp;
 					const fightdata = new fightData(
 						data[0].name,

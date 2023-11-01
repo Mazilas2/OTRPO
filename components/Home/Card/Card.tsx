@@ -7,6 +7,7 @@ import Image from "next/image";
 import "./Card.css";
 import CustomRating from "./Rating";
 import CustomStat from "./Stat";
+import axios from "axios";
 
 interface CardProps {
 	item: {
@@ -84,8 +85,8 @@ const CustomCard: React.FC<CardProps> = ({
 	const [selectedRating, setSelectedRating] = useState(0);
 
 	useEffect(() => {
-		fetch(`/api/get_ratings?name=${item.name}`)
-			.then((response) => response.json())
+		axios.get(`/api/get_ratings?name=${item.name}`)
+			.then((response) => response.data)
 			.then((data) => {
 				if (data.ratings) {
 					setPokemonRating([...pokemonRating, ...data.ratings]);
@@ -125,19 +126,13 @@ const CustomCard: React.FC<CardProps> = ({
 
 	const handleSubmit = () => {
 		console.log(selectedRating);
-		fetch("/api/sendReview", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
+		axios
+			.post("/api/sendReview", {
 				rating: selectedRating,
 				pokemon: item.name,
-			}),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				console.log("POST request response", data);
+			})
+			.then((response) => {
+				console.log("POST request response", response.data);
 			})
 			.catch((error) => {
 				console.error("Error sending POST request", error);
