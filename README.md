@@ -1,25 +1,5 @@
 ## Getting Started
 
-First, install the dependencies:
-
-```bash
-npm install
-# or
-yarn
-# or
-pnpm install
-```
-
-Then, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
-
 Additionally, you need to create a .env file in the root folder:
 ```env
 REDIS_HOST="..."
@@ -37,11 +17,11 @@ REDIS_URL="..."
 REDIS_TOKEN="..."
 ```
 
-To re-create db file:
-## 1 Step
-Delete old pokemons.db file
-## 2 Step 
-Run create_db
-```bash
-python ./api/create_db.py
-```
+### 1. To start, you need to pull Docker
+  ```bash
+  docker pull mazilas2/otrpoapp:flask
+  ```
+### 2. Then start server by command:
+  ```bash
+  docker run --env-file .env --rm -it -p 3000:3000/tcp otrpoapp:flask
+  ```
