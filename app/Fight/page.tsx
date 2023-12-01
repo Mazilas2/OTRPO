@@ -314,6 +314,7 @@ const FightPage = () => {
 							<CustomBar
 								item={pokemonDataUser}
 								key={pokemonDataUser.name}
+								pkmn_idx="my-pokemon"
 							/>
 						) : (
 							<span
@@ -338,6 +339,7 @@ const FightPage = () => {
 							<CustomBar
 								item={pokemonDataEnemy}
 								key={pokemonDataEnemy.name}
+								pkmn_idx="enemy-pokemon"
 							/>
 						) : (
 							<span

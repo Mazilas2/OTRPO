@@ -96,6 +96,9 @@ const Home: React.FC = () => {
 			</Head>
 			,
 			<div className="App">
+				<a href="/auth" className="btn absolute right-5 top-5 z-10 hover:bg-white hover:text-black">
+					Профиль
+				</a>
 				<header>
 					<form
 						className="SearchBar"

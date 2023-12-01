@@ -17,16 +17,18 @@ interface BarProps {
     };
     cur_hp: number;
   };
+  pkmn_idx: string;
 }
 
-const CustomBar: React.FC<BarProps> = ({ item }) => {
+const CustomBar: React.FC<BarProps> = ({ item, pkmn_idx }) => {
+  let alt_text = pkmn_idx === "my-pokemon" ? "My Pokemon" : "Enemy Pokemon";
   return (
     <>
       <div className="name">
         <Image
           src={item.img_url}
-          alt=""
-          id="my-pokemon-img"
+          alt={alt_text}
+          id={pkmn_idx}
           width={100}
           height={100}
         />

@@ -84,18 +84,18 @@ const CustomCard: React.FC<CardProps> = ({
 	const [pokemonRating, setPokemonRating] = useState<number[]>([]);
 	const [selectedRating, setSelectedRating] = useState(0);
 
-	useEffect(() => {
-		axios.get(`/api/get_ratings?name=${item.name}`)
-			.then((response) => response.data)
-			.then((data) => {
-				if (data.ratings) {
-					setPokemonRating([...pokemonRating, ...data.ratings]);
-				}
-			})
-			.catch((error) => {
-				console.error("Error fetching ratings:", error);
-			});
-	}, []);
+	// useEffect(() => {
+	// 	axios.get(`/api/get_ratings?name=${item.name}`)
+	// 		.then((response) => response.data)
+	// 		.then((data) => {
+	// 			if (data.ratings) {
+	// 				setPokemonRating([...pokemonRating, ...data.ratings]);
+	// 			}
+	// 		})
+	// 		.catch((error) => {
+	// 			console.error("Error fetching ratings:", error);
+	// 		});
+	// }, []);
 
 	const handleSendToFtp = () => {
 		const dataToSend = {

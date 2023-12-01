@@ -36,6 +36,15 @@ class PokemonRatings(Base):
     rating = Column(Float)
     time = Column(DateTime, default=datetime.datetime.utcnow)
 
+class Users(Base):
+    """Класс для работы с таблицей пользователей"""
+
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    user_name = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+
 
 def create_database_and_tables():
     inspector = inspect(engine)
