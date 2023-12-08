@@ -46,6 +46,7 @@ class fightData {
 const FightPage = () => {
     const {data: session} = useSession();
     const [isInitialized, setInitialized] = useState(false);
+    const [rounds, setRounds] = useState(0);
 
     const [pokemonDataUser, setPokemonDataUser] = useState<fightData>(
         new fightData(
@@ -105,6 +106,7 @@ const FightPage = () => {
                 user_pkmn: userPkmn,
                 enemy_pkmn: enemyPkmn,
                 winner: winner,
+                rounds: rounds,
             });
             if (response.status === 200) {
                 return response.data;
@@ -169,6 +171,7 @@ const FightPage = () => {
             })
             .then((response) => response.data)
             .then(async (data) => {
+                setRounds(rounds+1)
                 console.log(data,"DAT");
                 isAttackUser = data.isAttackUser;
                 console.log(isAttackUser)

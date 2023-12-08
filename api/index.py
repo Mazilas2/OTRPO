@@ -16,7 +16,7 @@ import logging
 
 logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
 
-from sqlalchemy import Float, create_engine
+from sqlalchemy import Float, case, create_engine, func, select
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy import Column, Integer, String, inspect, DateTime
 
@@ -61,6 +61,7 @@ class Results(Base):
     enemy_pkmn = Column(String)
     winner = Column(String)
     time = Column(DateTime, default=datetime.datetime.utcnow)
+    rounds = Column(Integer)
 
 
 class PokemonRatings(Base):
@@ -153,11 +154,11 @@ def update_pokemon_data(data, config):
     return data
 
 
-def saveToSql(user_pkmn, enemy_pkmn, winner):
+def saveToSql(user_pkmn, enemy_pkmn, winner, rounds):
     """Сохранить результаты боя в базу данных"""
     try:
         with Session(autoflush=False, bind=engine) as db:
-            result = Results(user_pkmn=user_pkmn, enemy_pkmn=enemy_pkmn, winner=winner)
+            result = Results(user_pkmn=user_pkmn, enemy_pkmn=enemy_pkmn, winner=winner, rounds=rounds)
             db.add(result)
             db.commit()
 
@@ -417,6 +418,7 @@ def save_fight_result():
     user_pkmn = data.get("user_pkmn")
     enemy_pkmn = data.get("enemy_pkmn")
     winner = data.get("winner")
+    rounds = data.get("rounds")
 
     # Check if the required data is provided
     if user_pkmn is None or enemy_pkmn is None or winner is None:
@@ -427,7 +429,7 @@ def save_fight_result():
         with Session(autoflush=False, bind=engine) as db:
                 winner = db.query(Users).filter_by(email=winner).first().id
     print(winner)
-    result = saveToSql(user_pkmn, enemy_pkmn, winner)
+    result = saveToSql(user_pkmn, enemy_pkmn, winner, rounds)
 
     return jsonify({"message": result})
 
@@ -612,6 +614,70 @@ def isFA():
         if secret_tfa:
             return jsonify({"enabled":True})
         return jsonify({"enabled":False})
+    
+@app.route('/api/getBattles', methods=['GET'])
+def get_battles():
+    session = Session()
+    delta = (request.args.get('weeks'))
+    print(delta)
+    if delta:
+        delta = int(delta)
+        two_weeks_ago = datetime.datetime.now() - datetime.timedelta(weeks=delta)
+        battles = session.query(func.count(Results.id)).filter(Results.time > two_weeks_ago).scalar()
+        rounds = session.query(func.sum(Results.rounds)).filter(Results.time > two_weeks_ago).scalar()
+        session.close()
+    else:
+        battles = session.query(func.count(Results.id)).scalar()
+        rounds = session.query(func.sum(Results.rounds)).scalar()
+        session.close()
+    return jsonify({'battles': battles, 'rounds': rounds})
+
+@app.route('/api/getTop_pokemons', methods=['GET'])
+def get_top_pokemons():
+    session = Session()
+
+    # Retrieve unique Pokémon names from user_pkmn column
+    query_user_pkmn = select(Results.user_pkmn).distinct()
+    result_user_pkmn = session.execute(query_user_pkmn)
+
+    # Retrieve unique Pokémon names from enemy_pkmn column
+    query_enemy_pkmn = select(Results.enemy_pkmn).distinct()
+    result_enemy_pkmn = session.execute(query_enemy_pkmn)
+
+    # Extract the Pokémon names from the result
+    pokemon_names = set()
+    for row in result_user_pkmn:
+        pokemon_names.add(row[0])
+    for row in result_enemy_pkmn:
+        pokemon_names.add(row[0])
+    print(pokemon_names)
+    pokemon_values = {}
+    for name in pokemon_names:
+        pokemon_values[name] = 0
+    query_results = session.query(Results).filter(Results.winner != "Computer")
+    for result in query_results:
+        pokemon_name = result.user_pkmn
+        pokemon_values[pokemon_name] += 1
+    query_results = session.query(Results).filter(Results.winner == "Computer")
+    for result in query_results:
+        pokemon_name = result.enemy_pkmn
+        pokemon_values[pokemon_name] += 1
+    print(pokemon_values)
+    print(sum(pokemon_values.values()))
+    sorted_pokemon_values = sorted(pokemon_values.items(), key=lambda x: x[1], reverse=True)
+
+    # Get the top 5 Pokémon
+    top_5_pokemons = sorted_pokemon_values[:5]
+    response = {
+        "top_pokemons": []
+    }
+    for pokemon in top_5_pokemons:
+        response["top_pokemons"].append({
+            "name": pokemon[0],
+            "value": pokemon[1]
+        })
+    
+    return {"result":response}
 
 if __name__ == "__main__":
     app.run(debug=True, port=5328)

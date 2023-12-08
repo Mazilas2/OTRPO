@@ -1,5 +1,7 @@
 import datetime
 import os
+import random
+import requests
 
 from sqlalchemy import DateTime, Float, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -25,6 +27,7 @@ class Results(Base):
     enemy_pkmn = Column(String)
     winner = Column(String)
     time = Column(DateTime, default=datetime.datetime.utcnow)
+    rounds = Column(Integer)
 
 
 class PokemonRatings(Base):
@@ -53,6 +56,32 @@ def create_database_and_tables():
     if not inspector.has_table("results"):
         Base.metadata.create_all(engine)
         print("База данных и таблица созданы")
+        fill_database()
+
+def fill_database():
+    print("INSERTING VALUES TO DB")
+    session = Session()
+    print("INSERT USER test-test-test")
+    user = Users(user_name="test", email="test", password="test")
+    session.add(user)
+    session.commit()
+
+    response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=10000")
+    pokemon_names = [item['name'] for item in response.json()['results']]
+
+    # Insert 5000 random results
+    for _ in range(5000):
+        user_pkmn = random.choice(pokemon_names)
+        enemy_pkmn = random.choice(pokemon_names)
+        winner = random.choice(["User", "Computer"])
+        time = datetime.datetime(2023, random.randint(1, 12), random.randint(1, 28))  # Random date in 2023
+        rounds = random.randint(2,20)
+        result = Results(user_pkmn=user_pkmn, enemy_pkmn=enemy_pkmn, winner=winner, time=time, rounds=rounds)
+        session.add(result)
+
+    session.commit()
+    session.close()
+
 
 
 if __name__ == "__main__":
