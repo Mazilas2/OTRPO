@@ -44,6 +44,8 @@ class Users(Base):
     user_name = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
+    github_email = Column(String, unique=True, nullable=True)
+    tfa_secret = Column(String, unique=False, nullable=True)
 
 
 def create_database_and_tables():

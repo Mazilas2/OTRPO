@@ -14,9 +14,7 @@ const nextConfig = {
   images: {
     domains: ['raw.githubusercontent.com', 'img.pokemondb.net'], // Add the domains you want to allow here
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  
 };
 
 module.exports = nextConfig;

@@ -5,6 +5,7 @@ import random
 import collections
 import os
 import time
+import secrets
 
 collections.Iterable = collections.abc.Iterable
 from flask import Flask, jsonify, request
@@ -70,6 +71,17 @@ class PokemonRatings(Base):
     pokemon_name = Column(String)
     rating = Column(Float)
     time = Column(DateTime, default=datetime.datetime.utcnow)
+
+class Users(Base):
+    """Класс для работы с таблицей пользователей"""
+
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    user_name = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    github_email = Column(String, unique=True, nullable=True)
+    tfa_secret = Column(String, unique=False, nullable=True)
 
 
 def get_data(url):
@@ -364,10 +376,10 @@ def attack():
     computer_attack = random.randint(0, 10)
     if int(user_attack) % 2 == computer_attack % 2:
         # Атакует пользователь
-        return {"isAttackUser": True}
+        return jsonify({"isAttackUser": True})
     else:
         # Атакует компьютер
-        return {"isAttackUser": False}
+        return jsonify({"isAttackUser": False})
 
 
 @app.route("/api/fight/fast", methods=["GET"])
@@ -411,6 +423,10 @@ def save_fight_result():
         return jsonify({"error": "Missing data in the request"}), 400
 
     # Save the fight result to the database
+    if winner != "Computer":
+        with Session(autoflush=False, bind=engine) as db:
+                winner = db.query(Users).filter_by(email=winner).first().id
+    print(winner)
     result = saveToSql(user_pkmn, enemy_pkmn, winner)
 
     return jsonify({"message": result})
@@ -560,6 +576,42 @@ def send_review():
 
     return jsonify({"Message": "OK"})
 
+@app.route("/api/getFA", methods=["GET"])
+def get2FA():
+    email = request.args.get('email')
+    print(email)
+    with Session(autoflush=False, bind=engine) as db:
+        secret_tfa = db.query(Users).filter_by(email=email).first().tfa_secret
+        print(secret_tfa)
+        if secret_tfa:
+            # If secret_tfa is not None, remove it from the database
+            user = db.query(Users).filter_by(email=email).first()
+            user.tfa_secret = None
+            db.commit()
+            return jsonify({"secret_tfa": "Secret removed from database"})
+        else:
+            return jsonify({"activate": True})
+
+@app.route("/api/setFA", methods=["POST"])
+def setFA():
+    data = request.get_json()
+    email = data.get("email")
+    secret = data.get("secret")
+    print(email)
+    with Session(autoflush=False, bind=engine) as db:
+        user = db.query(Users).filter_by(email=email).first()
+        user.tfa_secret = secret
+        db.commit()
+        return jsonify({"Message":"OK"})
+
+@app.route("/api/isFA", methods=["GET"])
+def isFA():
+    email = request.args.get('email')
+    with Session(autoflush=False, bind=engine) as db:
+        secret_tfa = db.query(Users).filter_by(email=email).first().tfa_secret
+        if secret_tfa:
+            return jsonify({"enabled":True})
+        return jsonify({"enabled":False})
 
 if __name__ == "__main__":
     app.run(debug=True, port=5328)

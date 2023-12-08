@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"flask-dev": "cross-env FLASK_DEBUG=1 pip3 install -r requirements.txt && python3 -m flask --app api/index run -p 5332",
+		"flask-dev": "cross-env FLASK_DEBUG=1 pip3 install -r requirements.txt && python3 api/create_db.py && python3 -m flask --app api/index run -p 5332",
 		"next-dev": "next dev",
 		"dev": "concurrently \"pnpm run next-dev\" \"pnpm run flask-dev\"",
 		"build": "next build",
@@ -17,6 +17,7 @@
 		"autoprefixer": "10.4.16",
 		"axios": "^1.6.2",
 		"bcrypt": "^5.1.1",
+		"bcryptjs": "^2.4.3",
 		"concurrently": "^8.2.2",
 		"cors": "^2.8.5",
 		"cross-env": "^7.0.3",
@@ -30,10 +31,14 @@
 		"net": "^1.0.2",
 		"next-auth": "^4.24.5",
 		"openssl": "^2.0.0",
+		"otplib": "^12.0.1",
 		"postcss": "8.4.31",
+		"qrcode": "^1.5.3",
+		"qrcode.react": "^3.1.0",
 		"react": "18.2.0",
 		"react-daisyui": "^4.1.2",
 		"react-dom": "18.2.0",
+		"react-hot-toast": "^2.4.1",
 		"redis": "^4.6.10",
 		"redis-server": "^1.2.2",
 		"sqlite": "^5.1.1",
@@ -43,6 +48,7 @@
 		"typescript": "5.2.2"
 	},
 	"devDependencies": {
+		"@types/bcrypt": "^5.0.2",
 		"@types/jest": "^29.5.8",
 		"daisyui": "^3.9.3",
 		"next": "^14.0.3"

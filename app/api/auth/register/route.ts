@@ -4,7 +4,6 @@ import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
 
 export async function POST(request: Request) {
-    var message = false;
     try {
         const {username, email, password} = await request.json();
         const hashedPassword = await hash(password, 10);
@@ -18,7 +17,7 @@ export async function POST(request: Request) {
         
     } catch (error) {
         console.error(error);
-        return NextResponse.json({message: false});
+        return NextResponse.json({message: false}, {status: 500});
     }
 
     return NextResponse.json({message: true});
