@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.11
 
     - name: Install dependencies python
       run: |
@@ -29,6 +29,9 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+
+    - name: Run server
+      run: npm run dev
 
     - name: Run Cypress tests
       run: npm run cypress:run
