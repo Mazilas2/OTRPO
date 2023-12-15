@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from sqlalchemy import Column, Integer, String, inspect
 
 DATABASE_PATH = "sqlite:///pokemons.db"
-engine = create_engine(DATABASE_PATH, echo=True)
+engine = create_engine(DATABASE_PATH, echo=False)
 Session = sessionmaker(bind=engine)
 
 
@@ -69,8 +69,8 @@ def fill_database():
     response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=10000")
     pokemon_names = [item['name'] for item in response.json()['results']]
 
-    # Insert 5000 random results
-    for _ in range(5000):
+    # Insert 500000 random results
+    for _ in range(500000):
         user_pkmn = random.choice(pokemon_names)
         enemy_pkmn = random.choice(pokemon_names)
         winner = random.choice(["User", "Computer"])
