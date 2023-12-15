@@ -1,0 +1,26 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - lab10
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Docker
+      uses: docker/setup-docker@v2
+
+    - name: Build Docker image
+      run: docker build -t your-docker-username/your-image-name:latest .
+
+    - name: Log in to Docker Hub
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Push Docker image
+      run: docker push your-docker-username/your-image-name:latest

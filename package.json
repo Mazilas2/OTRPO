@@ -8,7 +8,8 @@
 		"dev": "concurrently \"pnpm run next-dev\" \"pnpm run flask-dev\"",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"cypress:run": "cypress run"
 	},
 	"dependencies": {
 		"@grafana/ui": "^10.2.2",
@@ -22,6 +23,7 @@
 		"concurrently": "^8.2.2",
 		"cors": "^2.8.5",
 		"cross-env": "^7.0.3",
+		"cypress": "^13.6.1",
 		"dgram": "^1.0.1",
 		"dns": "^0.1.2",
 		"dotenv": "^16.3.1",
