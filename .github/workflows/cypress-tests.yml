@@ -32,6 +32,9 @@ jobs:
 
     - name: Run server
       run: npm run dev &
+
+    - name: Wait for 1 minute
+      run: sleep 60
     
     - name: Run Cypress tests
       run: npm run cypress:run
